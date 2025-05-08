@@ -11,22 +11,28 @@ def create_yearly_trends_chart(yearly_df):
     
     # Add traces for planned and actual hours
     fig.add_trace(
-        go.Area(
+        go.Scatter(
             x=yearly_df["year"],
             y=yearly_df["planned_hours"],
             name="Planned Hours",
             marker_color="#1e40af",
+            line=dict(color="#1e40af"),
+            mode="lines",
+            fill="tozeroy",
             fillcolor="rgba(30, 64, 175, 0.1)"
         ),
         secondary_y=False
     )
     
     fig.add_trace(
-        go.Area(
+        go.Scatter(
             x=yearly_df["year"],
             y=yearly_df["actual_hours"],
             name="Actual Hours",
             marker_color="#dc2626",
+            line=dict(color="#dc2626"),
+            mode="lines",
+            fill="tozeroy",
             fillcolor="rgba(220, 38, 38, 0.1)"
         ),
         secondary_y=False
