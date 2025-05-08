@@ -7,7 +7,7 @@ import numpy as np
 from datetime import datetime
 import os
 from utils.formatters import format_money, format_number, format_percent
-from utils.data_processing import (
+from utils.data_utils import (
     load_yearly_summary, 
     load_summary_metrics, 
     load_customer_profitability, 

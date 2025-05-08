@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from utils.formatters import format_money, format_number, format_percent
-from utils.data_processing import load_metric_data
+from utils.data_utils import load_metric_data
 
 # Page configuration
 st.set_page_config(

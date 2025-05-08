@@ -1,18 +1,18 @@
+"""
+Data utility functions for the Work History Dashboard
+"""
 import pandas as pd
 import numpy as np
 from datetime import datetime
 import os
 import random
 
-# In a real application, this would connect to a database
-# For this demo, we'll generate sample data based on the patterns in the provided files
-
 def generate_customer_data(customers, total_value):
     """Helper function to generate customer data with list_name support"""
     customer_data = []
     remaining_value = total_value
     
-    for i, customer in enumerate(customers[:-1]):
+    for i, customer in enumerate(customers):
         if i < len(customers) - 1:
             customer_ratio = random.uniform(0.05, 0.15)
             customer_value = total_value * customer_ratio
@@ -24,7 +24,7 @@ def generate_customer_data(customers, total_value):
             "customer": customer["name"],
             "list_name": customer["list_name"],
             "value": customer_value,
-            "percent_of_total": (customer_value / total_value) * 100
+            "percent_of_total": (customer_value / total_value) * 100 if total_value > 0 else 0
         })
     
     return customer_data
@@ -170,20 +170,16 @@ def load_workcenter_trends():
 
 def load_year_data(year):
     """Load detailed data for a specific year."""
+    print(f"Loading data for year {year}")
+    
     # All yearly data
     yearly_data = load_yearly_summary()
-    
-    # Debug info
-    print(f"Loading year data for {year}")
-    print(f"Available years: {[item['year'] for item in yearly_data]}")
     
     # Find the specific year's data
     year_data = next((item for item in yearly_data if item["year"] == str(year)), None)
     
-    # Debug info
-    print(f"Found year data: {year_data is not None}")
-    
     if not year_data:
+        print(f"No data found for year {year}")
         # If year not found, return empty data structure
         return {
             "summary": {
@@ -438,18 +434,16 @@ def load_year_data(year):
 
 def load_metric_data(metric):
     """Load detailed data for a specific metric."""
-    
-    # Debug information
     print(f"Loading data for metric: {metric}")
     
-    # Yearly breakdown data (used to derive yearly metric values)
+    # Yearly breakdown data
     yearly_data = load_yearly_summary()
     
-    if yearly_data is None or len(yearly_data) == 0:
-        print("Warning: No yearly data available")
+    if not yearly_data:
+        print("No yearly data available")
         return None
     
-    # Sample customers with list names - IMPORTANT: This includes both full names and shortened list_names
+    # Sample customers with list names
     customers = [
         {"name": "Aerospace Dynamics", "list_name": "Aerospace Dyn."},
         {"name": "Precision Manufacturing", "list_name": "Precision Mfg."},
@@ -465,7 +459,7 @@ def load_metric_data(metric):
         {"name": "Chemical Processing Inc", "list_name": "Chemical Proc."}
     ]
     
-    # Sample work centers
+    # Work centers
     work_centers = [
         "Assembly", "Machining", "Welding", "Inspection", "Painting",
         "Testing", "Packaging", "CNC", "Quality Control", "Finishing",
@@ -482,266 +476,99 @@ def load_metric_data(metric):
         "avg_cost_per_hour", "total_jobs", "total_operations", "total_customers"
     ]
     
-    # Generate data based on selected metric
-    if metric == "planned_hours":
-        yearly_values = [float(item["planned_hours"]) for item in yearly_data]
-        yearly_trend = [{"year": item["year"], "value": float(item["planned_hours"])} for item in yearly_data]
-        
-        # Generate customer data
-        customer_data = []
-        total_hours = sum(yearly_values)
-        remaining_hours = total_hours
-        
-        for i, customer in enumerate(customers[:-1]):
-            if i < len(customers) - 1:
-                customer_ratio = random.uniform(0.05, 0.15)
-                customer_hours = total_hours * customer_ratio
-                remaining_hours -= customer_hours
-            else:
-                customer_hours = remaining_hours
-            
-            customer_data.append({
-                "customer": customer,
-                "value": customer_hours,
-                "percent_of_total": (customer_hours / total_hours) * 100
-            })
-        
-        # Generate work center data
-        workcenter_data = []
-        remaining_hours = total_hours
-        
-        for i, wc in enumerate(work_centers[:-1]):
-            if i < len(work_centers) - 1:
-                wc_ratio = random.uniform(0.05, 0.12)
-                wc_hours = total_hours * wc_ratio
-                remaining_hours -= wc_hours
-            else:
-                wc_hours = remaining_hours
-            
-            workcenter_data.append({
-                "workcenter": wc,
-                "value": wc_hours,
-                "percent_of_total": (wc_hours / total_hours) * 100
-            })
-        
-        # Generate monthly data
-        monthly_data = []
-        for month in months:
-            monthly_data.append({
-                "month": month,
-                "value": total_hours / 12 * random.uniform(0.7, 1.3)
-            })
-        
-        # Generate correlations
-        correlations = []
-        for corr_metric in all_metrics:
-            if corr_metric != metric:
-                strength = random.uniform(-1.0, 1.0)
-                correlations.append({
-                    "metric": corr_metric,
-                    "correlation": strength,
-                    "strength": "Strong positive" if strength > 0.7 else 
-                                "Moderate positive" if strength > 0.3 else
-                                "Weak positive" if strength > 0 else
-                                "Strong negative" if strength < -0.7 else
-                                "Moderate negative" if strength < -0.3 else
-                                "Weak negative"
-                })
-        
-        return {
-            "summary": {
-                "total": sum(yearly_values),
-                "yearly_avg": sum(yearly_values) / len(yearly_values),
-                "yoy_change": (yearly_values[-1] / yearly_values[-2] - 1) * 100 if len(yearly_values) > 1 else 0,
-                "trend_direction": "Increasing" if yearly_values[-1] > yearly_values[0] else "Decreasing",
-                "trend_strength": "Strong trend" if abs(yearly_values[-1] / yearly_values[0] - 1) > 0.3 else "Moderate trend"
-            },
-            "yearly_data": yearly_trend,
-            "customer_data": customer_data,
-            "workcenter_data": workcenter_data,
-            "monthly_data": monthly_data,
-            "correlations": correlations
-        }
+    # Function to extract yearly values based on metric
+    def extract_yearly_values(metric_name):
+        if metric_name == "planned_hours":
+            return [float(item["planned_hours"]) for item in yearly_data]
+        elif metric_name == "actual_hours":
+            return [float(item["actual_hours"]) for item in yearly_data]
+        elif metric_name == "overrun_hours":
+            return [float(item["overrun_hours"]) for item in yearly_data]
+        elif metric_name == "ncr_hours":
+            return [float(item["ncr_hours"]) for item in yearly_data]
+        elif metric_name == "job_count" or metric_name == "total_jobs":
+            return [float(item["job_count"]) for item in yearly_data]
+        elif metric_name == "operation_count" or metric_name == "total_operations":
+            return [float(item["operation_count"]) for item in yearly_data]
+        elif metric_name == "customer_count" or metric_name == "total_customers":
+            return [float(item["customer_count"]) for item in yearly_data]
+        elif metric_name == "planned_cost":
+            return [float(item["planned_hours"]) * 199 for item in yearly_data]
+        elif metric_name == "actual_cost":
+            return [float(item["actual_hours"]) * 199 for item in yearly_data]
+        elif metric_name == "overrun_cost":
+            return [float(item["overrun_hours"]) * 199 for item in yearly_data]
+        elif metric_name == "overrun_percent":
+            return [float(item["overrun_hours"]) / float(item["planned_hours"]) * 100 if float(item["planned_hours"]) > 0 else 0 for item in yearly_data]
+        elif metric_name == "avg_cost_per_hour":
+            return [199 for _ in yearly_data]  # Default hourly rate
+        else:
+            return [0 for _ in yearly_data]  # Default fallback
     
-    elif metric == "actual_hours":
-        yearly_values = [float(item["actual_hours"]) for item in yearly_data]
-        yearly_trend = [{"year": item["year"], "value": float(item["actual_hours"])} for item in yearly_data]
-        
-        # Similar logic for other metrics...
-        total_hours = sum(yearly_values)
-        
-        # Generate customer data
-        customer_data = []
-        remaining_hours = total_hours
-        
-        for i, customer in enumerate(customers[:-1]):
-            if i < len(customers) - 1:
-                customer_ratio = random.uniform(0.05, 0.15)
-                customer_hours = total_hours * customer_ratio
-                remaining_hours -= customer_hours
-            else:
-                customer_hours = remaining_hours
-            
-            customer_data.append({
-                "customer": customer,
-                "value": customer_hours,
-                "percent_of_total": (customer_hours / total_hours) * 100
-            })
-        
-        # Generate work center data
-        workcenter_data = []
-        remaining_hours = total_hours
-        
-        for i, wc in enumerate(work_centers[:-1]):
-            if i < len(work_centers) - 1:
-                wc_ratio = random.uniform(0.05, 0.12)
-                wc_hours = total_hours * wc_ratio
-                remaining_hours -= wc_hours
-            else:
-                wc_hours = remaining_hours
-            
-            workcenter_data.append({
-                "workcenter": wc,
-                "value": wc_hours,
-                "percent_of_total": (wc_hours / total_hours) * 100
-            })
-        
-        # Generate monthly data
-        monthly_data = []
-        for month in months:
-            monthly_data.append({
-                "month": month,
-                "value": total_hours / 12 * random.uniform(0.7, 1.3)
-            })
-        
-        # Generate correlations
-        correlations = []
-        for corr_metric in all_metrics:
-            if corr_metric != metric:
-                strength = random.uniform(-1.0, 1.0)
-                correlations.append({
-                    "metric": corr_metric,
-                    "correlation": strength,
-                    "strength": "Strong positive" if strength > 0.7 else 
-                                "Moderate positive" if strength > 0.3 else
-                                "Weak positive" if strength > 0 else
-                                "Strong negative" if strength < -0.7 else
-                                "Moderate negative" if strength < -0.3 else
-                                "Weak negative"
-                })
-        
-        return {
-            "summary": {
-                "total": sum(yearly_values),
-                "yearly_avg": sum(yearly_values) / len(yearly_values),
-                "yoy_change": (yearly_values[-1] / yearly_values[-2] - 1) * 100 if len(yearly_values) > 1 else 0,
-                "trend_direction": "Increasing" if yearly_values[-1] > yearly_values[0] else "Decreasing",
-                "trend_strength": "Strong trend" if abs(yearly_values[-1] / yearly_values[0] - 1) > 0.3 else "Moderate trend"
-            },
-            "yearly_data": yearly_trend,
-            "customer_data": customer_data,
-            "workcenter_data": workcenter_data,
-            "monthly_data": monthly_data,
-            "correlations": correlations
-        }
+    # Extract values based on the metric
+    yearly_values = extract_yearly_values(metric)
+    yearly_trend = [{"year": item["year"], "value": value} for item, value in zip(yearly_data, yearly_values)]
     
-    elif metric == "overrun_hours":
-        yearly_values = [float(item["overrun_hours"]) for item in yearly_data]
-        yearly_trend = [{"year": item["year"], "value": float(item["overrun_hours"])} for item in yearly_data]
-        
-        # Similar logic for other metrics...
-        total_hours = sum(yearly_values)
-        
-        # Generate customer data
-        customer_data = []
-        remaining_hours = total_hours
-        
-        for i, customer in enumerate(customers[:-1]):
-            if i < len(customers) - 1:
-                customer_ratio = random.uniform(0.05, 0.15)
-                customer_hours = total_hours * customer_ratio
-                remaining_hours -= customer_hours
-            else:
-                customer_hours = remaining_hours
-            
-            customer_data.append({
-                "customer": customer,
-                "value": customer_hours,
-                "percent_of_total": (customer_hours / total_hours) * 100
-            })
-        
-        # Generate work center data
-        workcenter_data = []
-        remaining_hours = total_hours
-        
-        for i, wc in enumerate(work_centers[:-1]):
-            if i < len(work_centers) - 1:
-                wc_ratio = random.uniform(0.05, 0.12)
-                wc_hours = total_hours * wc_ratio
-                remaining_hours -= wc_hours
-            else:
-                wc_hours = remaining_hours
-            
-            workcenter_data.append({
-                "workcenter": wc,
-                "value": wc_hours,
-                "percent_of_total": (wc_hours / total_hours) * 100
-            })
-        
-        # Generate monthly data
-        monthly_data = []
-        for month in months:
-            monthly_data.append({
-                "month": month,
-                "value": total_hours / 12 * random.uniform(0.7, 1.3)
-            })
-        
-        # Generate correlations
-        correlations = []
-        for corr_metric in all_metrics:
-            if corr_metric != metric:
-                strength = random.uniform(-1.0, 1.0)
-                correlations.append({
-                    "metric": corr_metric,
-                    "correlation": strength,
-                    "strength": "Strong positive" if strength > 0.7 else 
-                                "Moderate positive" if strength > 0.3 else
-                                "Weak positive" if strength > 0 else
-                                "Strong negative" if strength < -0.7 else
-                                "Moderate negative" if strength < -0.3 else
-                                "Weak negative"
-                })
-        
-        return {
-            "summary": {
-                "total": sum(yearly_values),
-                "yearly_avg": sum(yearly_values) / len(yearly_values),
-                "yoy_change": (yearly_values[-1] / yearly_values[-2] - 1) * 100 if len(yearly_values) > 1 else 0,
-                "trend_direction": "Increasing" if yearly_values[-1] > yearly_values[0] else "Decreasing",
-                "trend_strength": "Strong trend" if abs(yearly_values[-1] / yearly_values[0] - 1) > 0.3 else "Moderate trend"
-            },
-            "yearly_data": yearly_trend,
-            "customer_data": customer_data,
-            "workcenter_data": workcenter_data,
-            "monthly_data": monthly_data,
-            "correlations": correlations
-        }
+    # Calculate total value
+    total_value = sum(yearly_values)
     
-    # For other metrics, follow a similar pattern with appropriate calculations
-    # For example, for cost metrics, calculate using hourly rate
+    # Generate customer data
+    customer_data = generate_customer_data(customers, total_value)
     
-    # For demonstration, return generic structure for other metrics
+    # Generate work center data
+    workcenter_data = []
+    remaining_value = total_value
+    
+    for i, wc in enumerate(work_centers):
+        if i < len(work_centers) - 1:
+            wc_ratio = random.uniform(0.05, 0.12)
+            wc_value = total_value * wc_ratio
+            remaining_value -= wc_value
+        else:
+            wc_value = remaining_value
+        
+        workcenter_data.append({
+            "workcenter": wc,
+            "value": wc_value,
+            "percent_of_total": (wc_value / total_value) * 100 if total_value > 0 else 0
+        })
+    
+    # Generate monthly data
+    monthly_data = []
+    for month in months:
+        monthly_data.append({
+            "month": month,
+            "value": total_value / 12 * random.uniform(0.7, 1.3) if total_value > 0 else 0
+        })
+    
+    # Generate correlations
+    correlations = []
+    for corr_metric in all_metrics:
+        if corr_metric != metric:
+            strength = random.uniform(-1.0, 1.0)
+            correlations.append({
+                "metric": corr_metric,
+                "correlation": strength,
+                "strength": "Strong positive" if strength > 0.7 else 
+                            "Moderate positive" if strength > 0.3 else
+                            "Weak positive" if strength > 0 else
+                            "Strong negative" if strength < -0.7 else
+                            "Moderate negative" if strength < -0.3 else
+                            "Weak negative"
+            })
+    
+    # Return formatted data
     return {
         "summary": {
-            "total": 0,
-            "yearly_avg": 0,
-            "yoy_change": 0,
-            "trend_direction": "No data",
-            "trend_strength": "No trend"
+            "total": total_value,
+            "yearly_avg": total_value / len(yearly_values) if len(yearly_values) > 0 else 0,
+            "yoy_change": (yearly_values[-1] / yearly_values[-2] - 1) * 100 if len(yearly_values) > 1 and yearly_values[-2] != 0 else 0,
+            "trend_direction": "Increasing" if yearly_values[-1] > yearly_values[0] else "Decreasing" if len(yearly_values) > 0 else "Neutral",
+            "trend_strength": "Strong trend" if len(yearly_values) > 0 and abs(yearly_values[-1] / yearly_values[0] - 1) > 0.3 else "Moderate trend"
         },
-        "yearly_data": [],
-        "customer_data": [],
-        "workcenter_data": [],
-        "monthly_data": [],
-        "correlations": []
+        "yearly_data": yearly_trend,
+        "customer_data": customer_data,
+        "workcenter_data": workcenter_data,
+        "monthly_data": monthly_data,
+        "correlations": correlations
     }

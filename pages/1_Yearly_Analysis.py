@@ -6,7 +6,7 @@ from plotly.subplots import make_subplots
 import numpy as np
 from datetime import datetime
 from utils.formatters import format_money, format_number, format_percent
-from utils.data_processing import load_year_data
+from utils.data_utils import load_year_data
 
 # Page configuration
 st.set_page_config(
