@@ -78,10 +78,13 @@ def create_customer_profit_chart(customer_data):
     # Create figure with secondary y-axis
     fig = make_subplots(specs=[[{"secondary_y": True}]])
     
+    # Use list_name if available, otherwise use customer
+    x_column = "list_name" if "list_name" in df.columns else "customer"
+    
     # Add bars for profitability
     fig.add_trace(
         go.Bar(
-            x=df["customer"],
+            x=df[x_column],
             y=df["profitability"],
             name="Profit Margin %",
             marker_color=[
@@ -94,7 +97,7 @@ def create_customer_profit_chart(customer_data):
     # Add line for hours
     fig.add_trace(
         go.Scatter(
-            x=df["customer"],
+            x=df[x_column],
             y=df["actual_hours"],
             name="Actual Hours",
             mode="lines+markers",
@@ -107,7 +110,7 @@ def create_customer_profit_chart(customer_data):
     # Add overrun hours area
     fig.add_trace(
         go.Scatter(
-            x=df["customer"],
+            x=df[x_column],
             y=df["overrun_hours"],
             name="Overrun Hours",
             mode="lines+markers",

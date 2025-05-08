@@ -126,9 +126,17 @@ if data:
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        st.metric("Most Profitable Customer", data["customer_data"]["top_customer"])
+        # If top_customer_list_name exists, use it, otherwise use top_customer
+        if "top_customer_list_name" in data["customer_data"]:
+            st.metric("Most Profitable Customer", data["customer_data"]["top_customer_list_name"])
+        else:
+            st.metric("Most Profitable Customer", data["customer_data"]["top_customer"])
     with col2:
-        st.metric("Highest Overrun Customer", data["customer_data"]["overrun_customer"])
+        # If overrun_customer_list_name exists, use it, otherwise use overrun_customer
+        if "overrun_customer_list_name" in data["customer_data"]:
+            st.metric("Highest Overrun Customer", data["customer_data"]["overrun_customer_list_name"])
+        else:
+            st.metric("Highest Overrun Customer", data["customer_data"]["overrun_customer"])
     with col3:
         st.metric("Repeat Business %", format_percent(data["customer_data"]["repeat_rate"]))
     with col4:

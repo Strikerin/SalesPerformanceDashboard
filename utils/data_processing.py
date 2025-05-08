@@ -89,9 +89,17 @@ def load_customer_profitability():
     # Sort by profitability for proper display
     profit_data = sorted(profit_data, key=lambda x: x["profitability"], reverse=True)
     
+    # Get the most profitable customer
+    top_customer_data = profit_data[0]
+    
+    # Get the customer with highest overrun
+    overrun_customer_data = sorted(profit_data, key=lambda x: x["overrun_hours"], reverse=True)[0]
+    
     return {
-        "top_customer": profit_data[0]["customer"],  # Most profitable
-        "overrun_customer": sorted(profit_data, key=lambda x: x["overrun_hours"], reverse=True)[0]["customer"],
+        "top_customer": top_customer_data["customer"],  # Most profitable customer name
+        "top_customer_list_name": top_customer_data["list_name"],  # Most profitable customer short name
+        "overrun_customer": overrun_customer_data["customer"],  # Highest overrun customer name
+        "overrun_customer_list_name": overrun_customer_data["list_name"],  # Highest overrun customer short name
         "repeat_rate": 76.5,  # Percentage of repeat business
         "avg_margin": 12.8,   # Average profit margin percentage
         "profit_data": profit_data
