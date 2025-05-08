@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Work History Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+/* ─────────────────────────────── */
+/* 🔹 Typography & Headings */
+.section-title {
+    font-weight: 600;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    color: #0a3d62;
+    border-bottom: 2px solid #dee2e6;
+    padding-bottom: 6px;
+}
+
+.card-label {
+    font-size: 0.85rem;
+    color: #555;
+}
+
+.card-value {
+    font-size: 1.4rem;
+    font-weight: bold;
+}
+
+/* ─────────────────────────────── */
+/* 🔹 Table Adjustments */
+.table td,
+.table th {
+    white-space: nowrap;
+    padding: 0.4rem 0.65rem;
+    vertical-align: middle;
+    font-size: 0.82rem;
+    text-align: center;
+}
+
+#yearlyTable,
+#workcenterTable {
+    width: 100%;
+    margin: 0 auto;
+    table-layout: auto;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    padding: 0.25rem;
+}
+
+/* ─────────────────────────────── */
+/* 🔹 Card & Section Consistency */
+.card {
+    border-radius: 0.6rem;
+    overflow: hidden;
+}
+
+.card-header {
+    font-weight: 600;
+    font-size: 0.95rem;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    padding: 0.6rem 1rem;
+}
+
+.card-body {
+    padding: 1rem;
+}
+
+.card-body canvas {
+    min-height: 300px;
+    max-height: 360px;
+}
+
+/* Keep all chart containers from getting too squished */
+.chart-container {
+    min-height: 320px;
+    padding: 0.5rem;
+}
+
+/* ─────────────────────────────── */
+/* 🔹 Metric Card Grid (Customer & WC) */
+#customerMetrics .card,
+#workcenterMetrics .card {
+    padding: 0.75rem 1rem;
+    height: 100%;
+    border-radius: 0.5rem;
+    font-size: 0.85rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+/* Add left border thickness for emphasis */
+.card.border-start {
+    border-left-width: 0.4rem !important;
+}
+
+/* ─────────────────────────────── */
+/* 🔹 Interaction & Utility */
+.clickable-row {
+    cursor: pointer;
+}
+
+.clickable-row:hover {
+    background-color: #f1f1f1;
+}
+
+.export-button {
+    float: right;
+    margin-top: -2rem;
+}
+
+/* ─────────────────────────────── */
+/* 🔹 Accordion Style (if still used) */
+.accordion-button {
+    font-weight: 600;
+    font-size: 1rem;
+    background-color: #e9f2fb;
+    color: #0a3d62;
+}
+
+.accordion-body {
+    background-color: #f9fbfc;
+}
+
+
+
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container-fluid py-4 px-3">
+  
+      <!-- 🔷 Title -->
+      <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+        <h1 class="text-primary display-6">📊 Work History Dashboard</h1>
+        <button class="btn btn-outline-primary btn-sm">
+          ⬇️ Export Report (CSV)
+        </button>
+      </div>
+  
+      <!-- 🔹 Summary + Operational Metrics -->
+      <div class="row g-3 mb-4">
+        <div class="col-xl-4 col-md-6">
+          <div class="card shadow-sm border border-primary border-2">
+            <div class="card-body" id="summaryCards"></div>
+          </div>
+        </div>
+        <div class="col-xl-8 col-md-6">
+          <div class="card shadow-sm border border-primary border-2">
+            <div class="card-body">
+              <h6 class="text-muted mb-2">📊 Operational Metrics</h6>
+              <div class="row row-cols-3 g-2" id="metricCards"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- 🗓️ Yearly Breakdown + Chart Side-by-Side -->
+      <div class="row g-4 mb-4">
+        <div class="col-md-6">
+          <div class="card shadow-sm border border-secondary border-2">
+            <div class="card-header fw-bold">📅 Yearly Breakdown Table</div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-sm table-striped table-bordered" id="yearlyTable"></table>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card shadow-sm border border-secondary border-2 h-100">
+            <div class="card-header fw-bold">📆 Yearly Cost & Hours</div>
+            <div class="card-body">
+              <canvas id="yearlyTrendChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- 👥 Customer Profit Analysis -->
+      <div class="card shadow-sm mb-4 border border-success border-2">
+        <div class="card-header fw-bold">💰 Customer Profit/Loss (Top 10)</div>
+        <div class="card-body">
+          <div class="row row-cols-1 row-cols-md-4 g-3 mb-3" id="customerMetrics">
+            <!-- Future cards like: Most Profitable Customer, Highest Overrun Customer, Repeat Business %, Avg Margin -->
+            <div class="col">
+              <div class="card bg-light border-start border-success border-4 shadow-sm h-100">
+                <div class="card-body small text-muted">Most Profitable Customer<br><span class="fw-bold fs-5" id="topCustomer">–</span></div>
+              </div>
+            </div>
+            <div class="col">
+              <div class="card bg-light border-start border-danger border-4 shadow-sm h-100">
+                <div class="card-body small text-muted">Highest Overrun Customer<br><span class="fw-bold fs-5" id="overrunCustomer">–</span></div>
+              </div>
+            </div>
+            <div class="col">
+              <div class="card bg-light border-start border-warning border-4 shadow-sm h-100">
+                <div class="card-body small text-muted">Repeat Business %<br><span class="fw-bold fs-5" id="repeatRate">–</span></div>
+              </div>
+            </div>
+            <div class="col">
+              <div class="card bg-light border-start border-info border-4 shadow-sm h-100">
+                <div class="card-body small text-muted">Avg Profit Margin<br><span class="fw-bold fs-5" id="avgMargin">–</span></div>
+              </div>
+            </div>
+          </div>
+          <canvas id="customerProfitChart"></canvas>
+        </div>
+      </div>
+  
+      <!-- 🏭 Work Center Analysis -->
+      <div class="card shadow-sm mb-4 border border-dark border-2">
+        <div class="card-header fw-bold">🏭 Work Center Trends & Table</div>
+        <div class="card-body">
+          <div class="row row-cols-1 row-cols-md-4 g-3 mb-3" id="workcenterMetrics">
+            <!-- Future cards like: Most Used WC, Highest Overrun WC, Avg Utilization -->
+            <div class="col">
+              <div class="card bg-light border-start border-dark border-4 shadow-sm h-100">
+                <div class="card-body small text-muted">Most Used Work Center<br><span class="fw-bold fs-5" id="mostUsedWC">–</span></div>
+              </div>
+            </div>
+            <div class="col">
+              <div class="card bg-light border-start border-danger border-4 shadow-sm h-100">
+                <div class="card-body small text-muted">Highest Overrun WC<br><span class="fw-bold fs-5" id="overrunWC">–</span></div>
+              </div>
+            </div>
+            <div class="col">
+              <div class="card bg-light border-start border-success border-4 shadow-sm h-100">
+                <div class="card-body small text-muted">Avg Utilization<br><span class="fw-bold fs-5" id="avgUtil">–</span></div>
+              </div>
+            </div>
+            <div class="col">
+              <div class="card bg-light border-start border-primary border-4 shadow-sm h-100">
+                <div class="card-body small text-muted">Total WC Hours<br><span class="fw-bold fs-5" id="totalWCHours">–</span></div>
+              </div>
+            </div>
+          </div>
+  
+          <div class="row g-4">
+            <div class="col-md-6">
+              <div class="table-responsive border rounded">
+                <table class="table table-sm table-striped table-bordered" id="workcenterTable"></table>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card shadow-sm h-100 border border-1 border-secondary">
+                <div class="card-body">
+                  <canvas id="workcenterTrendChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- 🧾 Calculation Notes (bottom reference) -->
+      <div class="mt-5">
+        <div class="alert alert-secondary small">
+          <strong>📘 Calculation Notes:</strong>
+          <ul class="mb-0">
+            <li><strong>Planned/Actual Cost:</strong> <code>Hours × $199/hour</code></li>
+            <li><strong>Overrun Hours:</strong> When <code>Actual > Planned</code></li>
+            <li><strong>NCR Hours:</strong> Total hours for <code>NCR</code> work center ops</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Bootstrap + Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='js/work_history.js') }}"></script>
+  
+</body>
+</html>
+
+

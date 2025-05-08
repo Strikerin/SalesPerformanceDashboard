@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Work History Breakdown – {{ year }}</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+/* -- COLORS & BASE STYLE -- */
+:root {
+  --main-bg: #f5f7fa;
+  --accent: #003b71;
+  --accent-light: #e6eef7;
+  --card-bg: #ffffff;
+  --border: #e0e0e0;
+  --shadow: 0 2px 6px rgba(0,0,0,0.06);
+  --text-muted: #6c757d;
+  --text-dark: #212529;
+  --soft-divider: #dee2e6;
+}
+
+body {
+  background-color: var(--main-bg);
+  color: var(--text-dark);
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* -- HEADER -- */
+header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.lead {
+  color: var(--text-muted);
+  font-size: 1.05rem;
+  margin-bottom: 1rem;
+}
+
+/* -- SECTION DIVIDERS -- */
+.section-title {
+  font-weight: 600;
+  font-size: 1.2rem;
+  color: var(--accent);
+  border-left: 4px solid var(--accent);
+  padding-left: 0.6rem;
+  margin-bottom: 0.75rem;
+}
+
+.table-section {
+  margin-top: 3rem;
+  padding: 2rem;
+  background-color: #fff;
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow);
+}
+
+/* -- SUMMARY CARDS -- */
+.card-metric {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  box-shadow: var(--shadow);
+  transition: all 0.15s ease-in-out;
+  height: 100%;
+}
+
+.card-metric:hover {
+  transform: scale(1.015);
+}
+
+.card-metric .card-body {
+  padding: 1rem;
+}
+
+.card-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.card-value {
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: var(--text-dark);
+}
+
+/* -- NAV TABS -- */
+.nav-tabs .nav-link {
+  border: none;
+  font-weight: 500;
+  color: var(--text-dark);
+  padding: 0.65rem 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.nav-tabs .nav-link.active {
+  color: var(--accent);
+  border-bottom: 3px solid var(--accent);
+  background-color: transparent;
+}
+
+/* -- TAB PANES -- */
+.tab-pane {
+  padding: 1.5rem 0.5rem;
+  border-radius: 0.75rem;
+}
+
+.tab-pane:not(:first-child) {
+  border-top: 1px solid var(--border);
+}
+
+/* -- TABLES -- */
+.table th {
+  background-color: var(--accent-light);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.table td {
+  vertical-align: middle;
+  font-size: 0.85rem;
+}
+
+.table-responsive {
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+/* -- CHART STYLING -- */
+canvas {
+  background-color: #fff;
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow);
+}
+
+/* -- TEXT UTILITIES -- */
+.text-danger { color: #c82333 !important; }
+.text-warning { color: #856404 !important; }
+.text-primary { color: var(--accent) !important; }
+
+/* -- SECTION HELP BOXES -- */
+.help-box {
+  font-size: 0.85rem;
+  background-color: #eef3f8;
+  border-left: 4px solid var(--accent);
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+.btn-outline-primary {
+  font-weight: 500;
+  padding: 0.5rem 1.2rem;
+  border-radius: 0.4rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--accent);
+  color: #fff;
+}
+
+  </style>
+</head>
+
+<body>
+    <div class="container-fluid py-4 px-4">
+      
+<!-- 🔷 Top Bar -->
+<div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <!-- 🔹 Brand & Page Title -->
+    <div>
+      <h1 class="display-6 fw-bold text-primary mb-0">Flow Operations</h1>
+      <h2 class="h4 fw-semibold text-dark mt-1">📊 Work History Overview – {{ year }}</h2>
+      <p class="lead text-muted mb-0">An executive analysis of shop performance with focus on cost, labor efficiency, and process breakdowns.</p>
+    </div>
+  
+    <!-- 🔙 Back Button -->
+    <div class="text-end">
+      <a href="{{ url_for('main.workhistory_dashboard') }}" class="btn btn-outline-primary btn-sm">
+        ⬅️ Back to Full Work History
+      </a>
+    </div>
+  </div>
+  
+  
+      <!-- 🔹 Yearly Summary Cards -->
+      <section class="mb-5">
+        <h5 class="text-dark fw-bold mb-2">📌 Year Summary</h5>
+        <p class="text-muted small mb-3">This section highlights total job hours, actual cost, ghost hours, and other high-level indicators for {{ year }}.</p>
+        <div class="row" id="yearSummaryCards"></div>
+      </section>
+  
+      <!-- 🔸 Quarterly Breakdown -->
+      <section class="table-section mb-5">
+        <h5 class="text-dark fw-bold">📆 Quarterly Summary</h5>
+        <p class="text-muted small mb-3">
+          Breakdown of hours and cost over time. Helps identify when shop demand or inefficiencies spike during the year.
+        </p>
+        <div class="table-responsive">
+          <table id="quarterlyTable" class="table table-sm table-bordered table-light"></table>
+        </div>
+      </section>
+  
+      <!-- 🔍 Interactive Tabbed Insights -->
+      <section id="dashboard-tabs">
+        <ul class="nav nav-tabs mb-3" id="dashboardTab" role="tablist">
+          <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#overrun">🔥 Overruns</button></li>
+          <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#ncr">⚠️ NCR Summary</button></li>
+          <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#workcenter">🏭 Work Centers</button></li>
+          <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#repeat">🔁 Repeat NCRs</button></li>
+          <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#adjustments">🛠 Adjustments</button></li>
+          <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#charts">📈 Charts</button></li>
+        </ul>
+  
+        <div class="tab-content">
+  
+          <!-- 🔥 Overrun Tab -->
+          <div class="tab-pane fade show active" id="overrun">
+            <div id="topOverrunSection">
+              <h6 class="fw-bold text-danger">🚨 Top Operational Overruns</h6>
+              <p class="text-muted small">
+                Displays the highest-cost operations that exceeded budgeted hours. <strong>Dismantling steps are excluded</strong> to focus on production phases.
+              </p>
+              <div id="topOverrunMetrics" class="row mb-3"></div>
+              <div class="table-responsive">
+                <table id="topOverrunTable" class="table table-sm table-bordered table-light"></table>
+              </div>
+            </div>
+          </div>
+  
+          <!-- ⚠️ NCR Tab -->
+          <div class="tab-pane fade" id="ncr">
+            <div id="ncrSection">
+              <h6 class="fw-bold text-warning">⚠️ Non-Conformance Reports</h6>
+              <p class="text-muted small">
+                Summarizes NCR hours and cost by part. Filterable and expandable. <br>
+                <span class="badge bg-warning text-dark">Only NCRs with cost impact are shown</span>
+              </p>
+              <div id="ncrMetrics" class="row mb-3"></div>
+              <div class="table-responsive">
+                <table id="ncrTable" class="table table-sm table-bordered table-light"></table>
+              </div>
+            </div>
+          </div>
+  
+          <!-- 🏭 Work Center Tab -->
+          <div class="tab-pane fade" id="workcenter">
+            <div id="workcenterSection">
+              <h6 class="fw-bold text-secondary">🏭 Work Center Efficiency</h6>
+              <p class="text-muted small">
+                Shows department-level planning vs. execution. Helps identify where process discipline may be breaking down.
+              </p>
+              <div id="workcenterMetrics" class="row mb-3"></div>
+              <div class="table-responsive">
+                <table id="workcenterTable" class="table table-sm table-bordered table-light"></table>
+              </div>
+            </div>
+          </div>
+  
+          <!-- 🔁 Repeat NCR Tab -->
+          <div class="tab-pane fade" id="repeat">
+            <div id="repeatSection">
+              <h6 class="fw-bold text-info">🔁 Repeat NCRs</h6>
+              <p class="text-muted small">
+                Identifies parts with NCR activity on multiple jobs. Helps trace systemic problems or recurring quality issues.
+              </p>
+              <div id="repeatMetrics" class="row mb-3"></div>
+              <div class="table-responsive">
+                <table id="repeatTable" class="table table-sm table-bordered table-light"></table>
+              </div>
+            </div>
+          </div>
+  
+          <!-- 🛠 Adjustments Tab -->
+          <div class="tab-pane fade" id="adjustments">
+            <div id="adjustSection">
+              <h6 class="fw-bold text-primary">🛠 Quoting Adjustment Recommendations</h6>
+              <p class="text-muted small">
+                Based on past performance, this section provides <strong>suggested increases to planned hours</strong> at job, part, and task level.
+                <br>Useful for refining quoting practices and buffer strategies.
+              </p>
+  
+              <!-- 🔹 Metric Cards -->
+              <div id="adjustMetrics" class="row mb-4"></div>
+  
+              <!-- 🔹 Job Breakdown (Collapsed) -->
+              <div id="adjustJobSection" class="mb-4"></div>
+  
+              <!-- 🔹 Part-Level Insights -->
+              <div class="table-responsive">
+                <table id="adjustPartTable" class="table table-sm table-bordered table-light"></table>
+              </div>
+            </div>
+          </div>
+  
+          <!-- 📈 Charts Tab -->
+          <div class="tab-pane fade" id="charts">
+            <h6 class="fw-bold text-success">📈 Visual Trend Analysis</h6>
+            <p class="text-muted small">Two charts highlight quarterly workload and cost overruns.</p>
+            <div class="row">
+              <div class="col-md-6 mb-4">
+                <canvas id="chartQuarterlyHours" height="240"></canvas>
+              </div>
+              <div class="col-md-6 mb-4">
+                <canvas id="chartOverrunCost" height="240"></canvas>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+      </section>
+    </div>
+  
+    <!-- 🔧 Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      const selectedYear = {{ year|tojson }};
+    </script>
+    <script src="{{ url_for('static', filename='js/work_history_year.js') }}"></script>
+  </body>
+  
+</html>
