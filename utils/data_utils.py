@@ -175,59 +175,74 @@ def load_year_data(year):
     # All yearly data
     yearly_data = load_yearly_summary()
     
-    # Find the specific year's data
-    year_data = next((item for item in yearly_data if item["year"] == str(year)), None)
-    
-    if not year_data:
-        print(f"No data found for year {year}")
-        # If year not found, return empty data structure
-        return {
-            "summary": {
-                "total_planned_hours": 0,
-                "total_actual_hours": 0,
-                "total_overrun_hours": 0,
-                "ghost_hours": 0,
-                "total_ncr_hours": 0,
-                "total_planned_cost": 0,
-                "total_actual_cost": 0,
-                "opportunity_cost_dollars": 0,
-                "recommended_buffer_percent": 0,
-                "total_jobs": 0,
-                "total_operations": 0,
-                "total_unique_parts": 0
-            },
-            "quarterly_summary": [],
-            "top_overruns": [],
-            "ncr_summary": [],
-            "workcenter_summary": [],
-            "repeat_ncr_failures": [],
-            "job_adjustments": []
-        }
-    
-    # Calculate costs using $199/hour rate
-    hourly_rate = 199
-    planned_cost = year_data["planned_hours"] * hourly_rate
-    actual_cost = year_data["actual_hours"] * hourly_rate
-    opportunity_cost = year_data["overrun_hours"] * hourly_rate
-    
-    # Calculate recommended buffer based on overrun percentage
-    overrun_percent = (year_data["overrun_hours"] / year_data["planned_hours"] * 100) if year_data["planned_hours"] > 0 else 0
-    recommended_buffer = min(overrun_percent * 1.2, 30)  # Cap at 30%
-    
-    # Generate ghost hours (planned hours with no recorded work)
-    ghost_hours = year_data["planned_hours"] * random.uniform(0.02, 0.08)
-    
-    # Calculate total unique parts (roughly 20-40% of operations)
-    unique_parts = int(year_data["operation_count"] * random.uniform(0.2, 0.4))
+    try:
+        # Ensure year is a string for comparison
+        year_str = str(year)
+        
+        # Find the specific year's data
+        year_data = next((item for item in yearly_data if item.get("year") == year_str), None)
+        
+        if not year_data:
+            print(f"No data found for year {year}")
+            # If year not found, return empty data structure
+            return {
+                "summary": {
+                    "total_planned_hours": 0,
+                    "total_actual_hours": 0,
+                    "total_overrun_hours": 0,
+                    "ghost_hours": 0,
+                    "total_ncr_hours": 0,
+                    "total_planned_cost": 0,
+                    "total_actual_cost": 0,
+                    "opportunity_cost_dollars": 0,
+                    "recommended_buffer_percent": 0,
+                    "total_jobs": 0,
+                    "total_operations": 0,
+                    "total_unique_parts": 0
+                },
+                "quarterly_summary": [],
+                "top_overruns": [],
+                "ncr_summary": [],
+                "workcenter_summary": [],
+                "repeat_ncr_failures": [],
+                "job_adjustments": []
+            }
+        
+        # Safely access dictionary values
+        planned_hours = year_data.get("planned_hours", 0)
+        actual_hours = year_data.get("actual_hours", 0)
+        overrun_hours = year_data.get("overrun_hours", 0)
+        ncr_hours = year_data.get("ncr_hours", 0)
+        job_count = year_data.get("job_count", 0)
+        operation_count = year_data.get("operation_count", 0)
+        
+        # Calculate costs using $199/hour rate
+        hourly_rate = 199
+        planned_cost = planned_hours * hourly_rate
+        actual_cost = actual_hours * hourly_rate
+        opportunity_cost = overrun_hours * hourly_rate
+        
+        # Calculate recommended buffer based on overrun percentage
+        overrun_percent = (overrun_hours / planned_hours * 100) if planned_hours > 0 else 0
+        recommended_buffer = min(overrun_percent * 1.2, 30)  # Cap at 30%
+        
+        # Generate ghost hours (planned hours with no recorded work)
+        ghost_hours = planned_hours * random.uniform(0.02, 0.08)
+        
+        # Calculate total unique parts (roughly 20-40% of operations)
+        unique_parts = int(operation_count * random.uniform(0.2, 0.4))
+    except Exception as e:
+        print(f"Error processing year data: {e}")
+        raise
     
     # Create quarterly summary
     quarters = ["Q1", "Q2", "Q3", "Q4"]
     quarterly_data = []
     
-    total_planned = year_data["planned_hours"]
-    total_actual = year_data["actual_hours"]
-    total_overrun = year_data["overrun_hours"]
-    total_jobs = year_data["job_count"]
+    total_planned = planned_hours
+    total_actual = actual_hours
+    total_overrun = overrun_hours
+    total_jobs = job_count
     
     remaining_planned = total_planned
     remaining_actual = total_actual
@@ -266,7 +281,9 @@ def load_year_data(year):
     # Generate top overruns
     top_overruns = []
     for i in range(15):  # Generate 15 top overruns
-        job_number = f"J{year[-2:]}-{random.randint(1000, 9999)}"
+        # Ensure year is properly formatted for job number
+        year_suffix = str(year)[-2:] if len(str(year)) >= 2 else str(year).zfill(2)
+        job_number = f"J{year_suffix}-{random.randint(1000, 9999)}"
         part_name = f"Part-{random.choice(['A', 'B', 'C', 'D', 'E'])}{random.randint(100, 999)}"
         work_center = random.choice(["Assembly", "Machining", "Welding", "Inspection", "CNC", "Testing"])
         task_description = random.choice([
@@ -316,15 +333,15 @@ def load_year_data(year):
     workcenter_summary = []
     
     # Distribute total hours among work centers
-    remaining_planned = year_data["planned_hours"]
-    remaining_actual = year_data["actual_hours"]
+    remaining_planned = planned_hours
+    remaining_actual = actual_hours
     
     for i, wc in enumerate(work_centers):
         # For all but the last work center, allocate a portion of the total
         if i < len(work_centers) - 1:
             wc_ratio = random.uniform(0.05, 0.25)
-            wc_planned = year_data["planned_hours"] * wc_ratio
-            wc_actual = year_data["actual_hours"] * wc_ratio
+            wc_planned = planned_hours * wc_ratio
+            wc_actual = actual_hours * wc_ratio
             
             remaining_planned -= wc_planned
             remaining_actual -= wc_actual
@@ -366,7 +383,9 @@ def load_year_data(year):
     # Generate job adjustments
     job_adjustments = []
     for i in range(12):  # Generate 12 job adjustment recommendations
-        job_number = f"J{year[-2:]}-{random.randint(1000, 9999)}"
+        # Ensure year is properly formatted for job number
+        year_suffix = str(year)[-2:] if len(str(year)) >= 2 else str(year).zfill(2)
+        job_number = f"J{year_suffix}-{random.randint(1000, 9999)}"
         
         planned_hours = random.uniform(20, 120)
         actual_hours = planned_hours * random.uniform(1.1, 1.5)
@@ -409,17 +428,17 @@ def load_year_data(year):
     
     return {
         "summary": {
-            "total_planned_hours": year_data["planned_hours"],
-            "total_actual_hours": year_data["actual_hours"],
-            "total_overrun_hours": year_data["overrun_hours"],
+            "total_planned_hours": planned_hours,
+            "total_actual_hours": actual_hours,
+            "total_overrun_hours": overrun_hours,
             "ghost_hours": ghost_hours,
-            "total_ncr_hours": year_data["ncr_hours"],
+            "total_ncr_hours": ncr_hours,
             "total_planned_cost": planned_cost,
             "total_actual_cost": actual_cost,
             "opportunity_cost_dollars": opportunity_cost,
             "recommended_buffer_percent": recommended_buffer,
-            "total_jobs": year_data["job_count"],
-            "total_operations": year_data["operation_count"],
+            "total_jobs": job_count,
+            "total_operations": operation_count,
             "total_unique_parts": unique_parts
         },
         "quarterly_summary": quarterly_data,
