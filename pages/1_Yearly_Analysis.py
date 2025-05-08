@@ -201,9 +201,10 @@ if data:
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
     )
     
-    # Set y-axes titles
-    fig.update_yaxes(title_text="Hours", secondary_y=False)
-    fig.update_yaxes(title_text="Overrun Cost ($)", secondary_y=True)
+    # Set y-axes titles - only use these if we have a subplot figure
+    if not quarterly_df.empty:
+        fig.update_yaxes(title_text="Hours", secondary_y=False)
+        fig.update_yaxes(title_text="Overrun Cost ($)", secondary_y=True)
     
     st.plotly_chart(fig, use_container_width=True)
     
