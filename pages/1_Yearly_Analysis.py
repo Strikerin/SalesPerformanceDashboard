@@ -85,39 +85,54 @@ if data:
     # Print column names for debugging
     st.write("Quarterly columns:", quarterly_df.columns.tolist())
     
-    # Format columns for display
-    display_quarterly = quarterly_df.copy()
-    
-    # Ensure all required columns exist before formatting
-    required_columns = ["planned_hours", "actual_hours", "overrun_hours", "overrun_cost", "total_jobs"]
-    for col in required_columns:
-        if col not in display_quarterly.columns:
-            display_quarterly[col] = 0  # Add missing column with default value
-    
-    # Now safely format the columns
-    display_quarterly["planned_hours"] = display_quarterly["planned_hours"].apply(format_number)
-    display_quarterly["actual_hours"] = display_quarterly["actual_hours"].apply(format_number)
-    display_quarterly["overrun_hours"] = display_quarterly["overrun_hours"].apply(format_number)
-    display_quarterly["overrun_cost"] = display_quarterly["overrun_cost"].apply(format_money)
-    display_quarterly["total_jobs"] = display_quarterly["total_jobs"].apply(lambda x: format_number(x, 0))
-    
-    # Rename columns for better display - dynamically assign column names
-    cols = ["Quarter"]
-    
-    # Add other column names only if they exist
-    if "planned_hours" in display_quarterly.columns:
-        cols.append("Planned")
-    if "actual_hours" in display_quarterly.columns:
-        cols.append("Actual")
-    if "overrun_hours" in display_quarterly.columns:
-        cols.append("Overrun")
-    if "overrun_cost" in display_quarterly.columns:
-        cols.append("Cost")
-    if "total_jobs" in display_quarterly.columns:
-        cols.append("Jobs")
+    # Check if DataFrame is not empty
+    if not quarterly_df.empty:
+        # Format columns for display
+        display_quarterly = quarterly_df.copy()
         
-    # Set the column names based on what's actually in the DataFrame
-    display_quarterly.columns = cols
+        # Print columns for debugging
+        st.write("Original quarterly columns:", display_quarterly.columns.tolist())
+        
+        # Create a new DataFrame with specific columns to avoid length mismatch
+        formatted_data = []
+        
+        for _, row in display_quarterly.iterrows():
+            formatted_row = {
+                "Quarter": row.get("quarter", "Unknown")
+            }
+            
+            if "planned_hours" in display_quarterly.columns:
+                formatted_row["Planned"] = format_number(row["planned_hours"])
+            else:
+                formatted_row["Planned"] = format_number(0)
+                
+            if "actual_hours" in display_quarterly.columns:
+                formatted_row["Actual"] = format_number(row["actual_hours"])
+            else:
+                formatted_row["Actual"] = format_number(0)
+                
+            if "overrun_hours" in display_quarterly.columns:
+                formatted_row["Overrun"] = format_number(row["overrun_hours"])
+            else:
+                formatted_row["Overrun"] = format_number(0)
+                
+            if "overrun_cost" in display_quarterly.columns:
+                formatted_row["Cost"] = format_money(row["overrun_cost"])
+            else:
+                formatted_row["Cost"] = format_money(0)
+                
+            if "total_jobs" in display_quarterly.columns:
+                formatted_row["Jobs"] = format_number(row["total_jobs"], 0)
+            else:
+                formatted_row["Jobs"] = format_number(0, 0)
+                
+            formatted_data.append(formatted_row)
+            
+        # Create a new DataFrame with consistent columns
+        display_quarterly = pd.DataFrame(formatted_data)
+    else:
+        # Create an empty DataFrame with the expected columns
+        display_quarterly = pd.DataFrame(columns=["Quarter", "Planned", "Actual", "Overrun", "Cost", "Jobs"])
     
     st.dataframe(display_quarterly, use_container_width=True, hide_index=True)
     

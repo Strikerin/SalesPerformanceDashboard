@@ -82,8 +82,11 @@ if data:
     
     # Create yearly trend chart
     if "yearly_data" in data:
-        # Debug data structure
-        st.write("Yearly data keys:", [k for k in data["yearly_data"][0].keys() if isinstance(data["yearly_data"], list) and len(data["yearly_data"]) > 0])
+        # Debug data structure - safely check if yearly_data exists and has elements
+        if isinstance(data["yearly_data"], list) and len(data["yearly_data"]) > 0:
+            st.write("Yearly data keys:", list(data["yearly_data"][0].keys()))
+        else:
+            st.write("Yearly data is empty or not a list")
         
         yearly_df = pd.DataFrame(data["yearly_data"])
         
@@ -116,29 +119,37 @@ if data:
         
         fig.update_traces(line=dict(width=3), hovertemplate=hovertemplate)
         
-        # Add annotations for min and max
-        max_row = yearly_df.loc[yearly_df[y_column].idxmax()]
-        min_row = yearly_df.loc[yearly_df[y_column].idxmin()]
-        
-        fig.add_annotation(
-            x=max_row["year"],
-            y=max_row[y_column],
-            text="Max",
-            showarrow=True,
-            arrowhead=1,
-            ax=0,
-            ay=-40
-        )
-        
-        fig.add_annotation(
-            x=min_row["year"],
-            y=min_row[y_column],
-            text="Min",
-            showarrow=True,
-            arrowhead=1,
-            ax=0,
-            ay=40
-        )
+        # Add annotations for min and max only if there is data
+        if not yearly_df.empty and y_column in yearly_df.columns:
+            # Safely handle potential errors
+            try:
+                max_row = yearly_df.loc[yearly_df[y_column].idxmax()]
+                min_row = yearly_df.loc[yearly_df[y_column].idxmin()]
+                
+                # Only add annotations if year column exists and has valid data
+                if "year" in max_row and "year" in min_row:
+                    fig.add_annotation(
+                        x=max_row["year"],
+                        y=max_row[y_column],
+                        text="Max",
+                        showarrow=True,
+                        arrowhead=1,
+                        ax=0,
+                        ay=-40
+                    )
+                    
+                    fig.add_annotation(
+                        x=min_row["year"],
+                        y=min_row[y_column],
+                        text="Min",
+                        showarrow=True,
+                        arrowhead=1,
+                        ax=0,
+                        ay=40
+                    )
+            except (ValueError, KeyError, TypeError) as e:
+                # Log the error but continue
+                st.write(f"Warning: Could not add min/max annotations: {e}")
         
         # Update layout
         fig.update_layout(
