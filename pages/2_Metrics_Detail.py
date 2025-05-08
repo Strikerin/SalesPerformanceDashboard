@@ -108,14 +108,41 @@ if data:
             y_title = "Hours" if "hours" in selected_metric else "Count"
             hovertemplate = "%{y:,.1f}"
         
-        fig = px.line(
-            yearly_df, 
-            x="year", 
-            y=y_column,
-            markers=True,
-            title=f"{METRICS[selected_metric]} by Year",
-            labels={"year": "Year", y_column: y_title}
-        )
+        # Check if yearly_df is empty or missing expected columns
+        if yearly_df.empty:
+            # Create an empty figure with a message
+            fig = go.Figure()
+            fig.add_annotation(
+                text="No yearly data available",
+                showarrow=False,
+                font=dict(size=20)
+            )
+        else:
+            # Print column names for debugging
+            st.write("Available columns:", yearly_df.columns.tolist())
+            
+            # Make sure required columns exist
+            if "year" not in yearly_df.columns:
+                # Create a year column with incremental years
+                yearly_df["year"] = [str(2020 + i) for i in range(len(yearly_df))]
+                
+            if y_column not in yearly_df.columns and "value" in yearly_df.columns:
+                # Use 'value' column if y_column doesn't exist
+                y_column = "value"
+                
+            elif y_column not in yearly_df.columns:
+                # Create a placeholder column if needed
+                yearly_df[y_column] = [0] * len(yearly_df)
+                
+            # Now create the figure
+            fig = px.line(
+                yearly_df, 
+                x="year", 
+                y=y_column,
+                markers=True,
+                title=f"{METRICS[selected_metric]} by Year",
+                labels={"year": "Year", y_column: y_title}
+            )
         
         fig.update_traces(line=dict(width=3), hovertemplate=hovertemplate)
         

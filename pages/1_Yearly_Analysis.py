@@ -136,31 +136,62 @@ if data:
     
     st.dataframe(display_quarterly, use_container_width=True, hide_index=True)
     
-    # Create quarterly visualization
-    fig = make_subplots(specs=[[{"secondary_y": True}]])
+    # Print quarterly columns for debugging
+    st.write("Quarterly DataFrame columns:", quarterly_df.columns.tolist() if not quarterly_df.empty else "Empty DataFrame")
     
-    # Ensure all required columns exist for visualization
-    for col in ["planned_hours", "actual_hours", "overrun_cost"]:
-        if col not in quarterly_df.columns:
-            quarterly_df[col] = 0  # Add missing column with default value
-    
-    # Add bar charts for hours
-    fig.add_trace(
-        go.Bar(x=quarterly_df["quarter"], y=quarterly_df["planned_hours"], name="Planned Hours", marker_color="#1e40af"),
-        secondary_y=False
-    )
-    
-    fig.add_trace(
-        go.Bar(x=quarterly_df["quarter"], y=quarterly_df["actual_hours"], name="Actual Hours", marker_color="#dc2626"),
-        secondary_y=False
-    )
-    
-    # Add line for overrun cost
-    fig.add_trace(
-        go.Scatter(x=quarterly_df["quarter"], y=quarterly_df["overrun_cost"], name="Overrun Cost", 
-                  mode="lines+markers", marker_color="#f59e0b", line=dict(width=3)),
-        secondary_y=True
-    )
+    # Check if DataFrame is empty or missing required columns
+    if quarterly_df.empty:
+        # Create a placeholder figure with a message
+        fig = go.Figure()
+        fig.add_annotation(
+            text="No quarterly data available",
+            showarrow=False,
+            font=dict(size=20)
+        )
+    else:
+        # Create quarterly visualization
+        fig = make_subplots(specs=[[{"secondary_y": True}]])
+        
+        # Get the quarter column name (might be 'Quarter' or 'quarter')
+        quarter_col = None
+        for col in quarterly_df.columns:
+            if col.lower() == 'quarter':
+                quarter_col = col
+                break
+        
+        # If quarter column not found, create one
+        if not quarter_col:
+            quarterly_df['Quarter'] = [f"Q{i+1}" for i in range(len(quarterly_df))]
+            quarter_col = 'Quarter'
+        
+        # Ensure all required columns exist for visualization
+        required_cols = {
+            "planned_hours": 0,
+            "actual_hours": 0,
+            "overrun_cost": 0
+        }
+        
+        for col_name, default_val in required_cols.items():
+            if col_name not in quarterly_df.columns:
+                quarterly_df[col_name] = default_val
+        
+        # Add bar charts for hours
+        fig.add_trace(
+            go.Bar(x=quarterly_df[quarter_col], y=quarterly_df["planned_hours"], name="Planned Hours", marker_color="#1e40af"),
+            secondary_y=False
+        )
+        
+        fig.add_trace(
+            go.Bar(x=quarterly_df[quarter_col], y=quarterly_df["actual_hours"], name="Actual Hours", marker_color="#dc2626"),
+            secondary_y=False
+        )
+        
+        # Add line for overrun cost
+        fig.add_trace(
+            go.Scatter(x=quarterly_df[quarter_col], y=quarterly_df["overrun_cost"], name="Overrun Cost", 
+                    mode="lines+markers", marker_color="#f59e0b", line=dict(width=3)),
+            secondary_y=True
+        )
     
     # Update layout
     fig.update_layout(
