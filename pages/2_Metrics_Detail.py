@@ -394,8 +394,14 @@ if data:
         })
         
         # Sort the DataFrame using the numeric values before displaying
-        sorted_indices = numeric_corr.abs().sort_values(ascending=False).index
-        display_corr = display_corr.reindex(sorted_indices)
+        # Make sure we're sorting on numeric values, not strings
+        try:
+            # First try to sort by absolute values using numeric column
+            sorted_indices = numeric_corr.abs().sort_values(ascending=False).index
+            display_corr = display_corr.reindex(sorted_indices)
+        except TypeError:
+            # If that fails (e.g., if values are strings), sort by the original values
+            display_corr = display_corr.sort_values("Correlation", ascending=False)
         
         st.dataframe(
             display_corr,
