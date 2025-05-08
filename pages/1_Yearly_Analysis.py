@@ -31,9 +31,14 @@ year = st.selectbox("Select Year", years, index=years.index(year) if year in yea
 @st.cache_data(ttl=3600)
 def get_yearly_data(selected_year):
     try:
-        return load_year_data(selected_year)
+        st.write(f"Debug: Attempting to load data for year {selected_year}")
+        data = load_year_data(selected_year)
+        st.write(f"Debug: Data loaded successfully: {data is not None}")
+        return data
     except Exception as e:
         st.error(f"Error loading data for year {selected_year}: {str(e)}")
+        import traceback
+        st.error(f"Traceback: {traceback.format_exc()}")
         return None
 
 # Load yearly data

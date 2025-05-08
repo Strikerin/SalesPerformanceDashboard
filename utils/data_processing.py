@@ -413,13 +413,24 @@ def load_metric_data(metric):
     # Yearly breakdown data (used to derive yearly metric values)
     yearly_data = load_yearly_summary()
     
-    # Sample customers
+    # Sample customers with list names
     customers = [
-        "Aerospace Dynamics", "Precision Manufacturing", "Industrial Solutions",
-        "TechFab Industries", "Maritime Systems", "Defense Components",
-        "Medical Devices Corp", "Energy Systems Inc", "Automotive Precision",
-        "Electronics Assembly", "Power Generation Ltd", "Chemical Processing Inc"
+        {"name": "Aerospace Dynamics", "list_name": "Aerospace Dyn."},
+        {"name": "Precision Manufacturing", "list_name": "Precision Mfg."},
+        {"name": "Industrial Solutions", "list_name": "Ind. Solutions"},
+        {"name": "TechFab Industries", "list_name": "TechFab Ind."},
+        {"name": "Maritime Systems", "list_name": "Maritime Sys."},
+        {"name": "Defense Components", "list_name": "Def. Components"},
+        {"name": "Medical Devices Corp", "list_name": "Medical Dev."},
+        {"name": "Energy Systems Inc", "list_name": "Energy Sys."},
+        {"name": "Automotive Precision", "list_name": "Auto Precision"},
+        {"name": "Electronics Assembly", "list_name": "Electronics"},
+        {"name": "Power Generation Ltd", "list_name": "Power Gen."},
+        {"name": "Chemical Processing Inc", "list_name": "Chemical Proc."}
     ]
+    
+    # Debug information - print metric
+    print(f"Loading data for metric: {metric}")
     
     # Sample work centers
     work_centers = [

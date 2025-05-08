@@ -44,9 +44,14 @@ selected_metric = st.selectbox(
 @st.cache_data(ttl=3600)
 def get_metric_data(metric):
     try:
-        return load_metric_data(metric)
+        st.write(f"Debug: Attempting to load data for metric '{metric}'")
+        data = load_metric_data(metric)
+        st.write(f"Debug: Metric data loaded successfully: {data is not None}")
+        return data
     except Exception as e:
         st.error(f"Error loading data for metric {metric}: {str(e)}")
+        import traceback
+        st.error(f"Traceback: {traceback.format_exc()}")
         return None
 
 # Load metric data
