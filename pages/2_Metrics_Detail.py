@@ -82,7 +82,19 @@ if data:
     
     # Create yearly trend chart
     if "yearly_data" in data:
+        # Debug data structure
+        st.write("Yearly data keys:", [k for k in data["yearly_data"][0].keys() if isinstance(data["yearly_data"], list) and len(data["yearly_data"]) > 0])
+        
         yearly_df = pd.DataFrame(data["yearly_data"])
+        
+        # Ensure 'year' column exists
+        if "year" not in yearly_df.columns and len(yearly_df) > 0:
+            # Try to find a column with year data or create it
+            if "date" in yearly_df.columns:
+                yearly_df["year"] = yearly_df["date"].str[:4]
+            else:
+                # Create a placeholder year column 
+                yearly_df["year"] = [str(2020 + i) for i in range(len(yearly_df))]
         
         if "cost" in selected_metric:
             y_column = "value"

@@ -82,6 +82,9 @@ if data:
     
     quarterly_df = pd.DataFrame(data["quarterly_summary"])
     
+    # Print column names for debugging
+    st.write("Quarterly columns:", quarterly_df.columns.tolist())
+    
     # Format columns for display
     display_quarterly = quarterly_df.copy()
     
@@ -98,8 +101,23 @@ if data:
     display_quarterly["overrun_cost"] = display_quarterly["overrun_cost"].apply(format_money)
     display_quarterly["total_jobs"] = display_quarterly["total_jobs"].apply(lambda x: format_number(x, 0))
     
-    # Rename columns for better display
-    display_quarterly.columns = ["Quarter", "Planned", "Actual", "Overrun", "Cost", "Jobs"]
+    # Rename columns for better display - dynamically assign column names
+    cols = ["Quarter"]
+    
+    # Add other column names only if they exist
+    if "planned_hours" in display_quarterly.columns:
+        cols.append("Planned")
+    if "actual_hours" in display_quarterly.columns:
+        cols.append("Actual")
+    if "overrun_hours" in display_quarterly.columns:
+        cols.append("Overrun")
+    if "overrun_cost" in display_quarterly.columns:
+        cols.append("Cost")
+    if "total_jobs" in display_quarterly.columns:
+        cols.append("Jobs")
+        
+    # Set the column names based on what's actually in the DataFrame
+    display_quarterly.columns = cols
     
     st.dataframe(display_quarterly, use_container_width=True, hide_index=True)
     
