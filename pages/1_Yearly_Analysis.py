@@ -84,6 +84,14 @@ if data:
     
     # Format columns for display
     display_quarterly = quarterly_df.copy()
+    
+    # Ensure all required columns exist before formatting
+    required_columns = ["planned_hours", "actual_hours", "overrun_hours", "overrun_cost", "total_jobs"]
+    for col in required_columns:
+        if col not in display_quarterly.columns:
+            display_quarterly[col] = 0  # Add missing column with default value
+    
+    # Now safely format the columns
     display_quarterly["planned_hours"] = display_quarterly["planned_hours"].apply(format_number)
     display_quarterly["actual_hours"] = display_quarterly["actual_hours"].apply(format_number)
     display_quarterly["overrun_hours"] = display_quarterly["overrun_hours"].apply(format_number)
@@ -97,6 +105,11 @@ if data:
     
     # Create quarterly visualization
     fig = make_subplots(specs=[[{"secondary_y": True}]])
+    
+    # Ensure all required columns exist for visualization
+    for col in ["planned_hours", "actual_hours", "overrun_cost"]:
+        if col not in quarterly_df.columns:
+            quarterly_df[col] = 0  # Add missing column with default value
     
     # Add bar charts for hours
     fig.add_trace(

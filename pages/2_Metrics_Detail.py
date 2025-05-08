@@ -308,6 +308,11 @@ if data:
         
         # Create table
         display_corr = corr_df.copy()
+        
+        # Store numeric values for sorting before formatting to strings
+        numeric_corr = display_corr["correlation"].copy()
+        
+        # Format correlation as string with 3 decimal places
         display_corr["correlation"] = display_corr["correlation"].apply(lambda x: f"{x:.3f}")
         
         display_corr = display_corr.rename(columns={
@@ -316,8 +321,12 @@ if data:
             "strength": "Strength"
         })
         
+        # Sort the DataFrame using the numeric values before displaying
+        sorted_indices = numeric_corr.abs().sort_values(ascending=False).index
+        display_corr = display_corr.reindex(sorted_indices)
+        
         st.dataframe(
-            display_corr.sort_values("Correlation", ascending=False, key=abs),
+            display_corr,
             use_container_width=True,
             hide_index=True
         )
