@@ -24,11 +24,11 @@ def filter_data(df, selected_year, selected_customer, selected_work_center, date
     
     if selected_customer != "All":
         if 'company' in filtered_df.columns:
-            filtered_df = filtered_df[filtered_df['company'] == selected_customer]
+            filtered_df = filtered_df[filtered_df['company'].astype(str) == selected_customer]
     
     if selected_work_center != "All":
         if 'work_center' in filtered_df.columns:
-            filtered_df = filtered_df[filtered_df['work_center'] == selected_work_center]
+            filtered_df = filtered_df[filtered_df['work_center'].astype(str) == selected_work_center]
     
     start_date, end_date = date_range
     if start_date and end_date:
@@ -54,16 +54,20 @@ def dashboard_filters_sidebar():
     
     # Customer filter
     if 'company' in df.columns:
-        customers = sorted(df['company'].unique())
-        selected_customer = st.sidebar.selectbox("Select Customer", ["All"] + list(customers), index=0)
+        # Convert all values to strings before sorting to avoid type comparison issues
+        customers = [str(c) for c in df['company'].unique() if not pd.isna(c)]
+        customers.sort()
+        selected_customer = st.sidebar.selectbox("Select Customer", ["All"] + customers, index=0)
         st.session_state['selected_customer'] = selected_customer
     else:
         selected_customer = "All"
     
     # Work center filter
     if 'work_center' in df.columns:
-        work_centers = sorted(df['work_center'].unique())
-        selected_work_center = st.sidebar.selectbox("Select Work Center", ["All"] + list(work_centers), index=0)
+        # Convert all values to strings before sorting to avoid type comparison issues
+        work_centers = [str(wc) for wc in df['work_center'].unique() if not pd.isna(wc)]
+        work_centers.sort()
+        selected_work_center = st.sidebar.selectbox("Select Work Center", ["All"] + work_centers, index=0)
         st.session_state['selected_work_center'] = selected_work_center
     else:
         selected_work_center = "All"
