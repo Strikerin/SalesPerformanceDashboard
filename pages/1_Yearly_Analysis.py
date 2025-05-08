@@ -31,14 +31,10 @@ year = st.selectbox("Select Year", years, index=years.index(year) if year in yea
 @st.cache_data(ttl=3600)
 def get_yearly_data(selected_year):
     try:
-        st.write(f"Debug: Attempting to load data for year {selected_year}")
         data = load_year_data(selected_year)
-        st.write(f"Debug: Data loaded successfully: {data is not None}")
         return data
     except Exception as e:
         st.error(f"Error loading data for year {selected_year}: {str(e)}")
-        import traceback
-        st.error(f"Traceback: {traceback.format_exc()}")
         return None
 
 # Load yearly data
@@ -87,16 +83,10 @@ if data:
     
     quarterly_df = pd.DataFrame(data["quarterly_summary"])
     
-    # Print column names for debugging
-    st.write("Quarterly columns:", quarterly_df.columns.tolist())
-    
     # Check if DataFrame is not empty
     if not quarterly_df.empty:
         # Format columns for display
         display_quarterly = quarterly_df.copy()
-        
-        # Print columns for debugging
-        st.write("Original quarterly columns:", display_quarterly.columns.tolist())
         
         # Create a new DataFrame with specific columns to avoid length mismatch
         formatted_data = []
@@ -141,8 +131,7 @@ if data:
     
     st.dataframe(display_quarterly, use_container_width=True, hide_index=True)
     
-    # Print quarterly columns for debugging
-    st.write("Quarterly DataFrame columns:", quarterly_df.columns.tolist() if not quarterly_df.empty else "Empty DataFrame")
+    # Quarterly data processed successfully
     
     # Check if DataFrame is empty or missing required columns
     if quarterly_df.empty:

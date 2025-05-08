@@ -57,6 +57,9 @@ including planned hours, actual hours, work centers, and customers.
 # Function to process and validate uploaded work history data
 def process_workhistory(uploaded_file):
     try:
+        # Make sure to clear the cache when new data is uploaded
+        st.cache_data.clear()
+        
         # Read Excel file
         df = pd.read_excel(uploaded_file, sheet_name="Sheet1", dtype=str)
         

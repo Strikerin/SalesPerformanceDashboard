@@ -44,14 +44,10 @@ selected_metric = st.selectbox(
 @st.cache_data(ttl=3600)
 def get_metric_data(metric):
     try:
-        st.write(f"Debug: Attempting to load data for metric '{metric}'")
         data = load_metric_data(metric)
-        st.write(f"Debug: Metric data loaded successfully: {data is not None}")
         return data
     except Exception as e:
         st.error(f"Error loading data for metric {metric}: {str(e)}")
-        import traceback
-        st.error(f"Traceback: {traceback.format_exc()}")
         return None
 
 # Load metric data
@@ -87,12 +83,6 @@ if data:
     
     # Create yearly trend chart
     if "yearly_data" in data:
-        # Debug data structure - safely check if yearly_data exists and has elements
-        if isinstance(data["yearly_data"], list) and len(data["yearly_data"]) > 0:
-            st.write("Yearly data keys:", list(data["yearly_data"][0].keys()))
-        else:
-            st.write("Yearly data is empty or not a list")
-        
         yearly_df = pd.DataFrame(data["yearly_data"])
         
         # Ensure 'year' column exists
@@ -123,8 +113,6 @@ if data:
                 font=dict(size=20)
             )
         else:
-            # Print column names for debugging
-            st.write("Available columns:", yearly_df.columns.tolist())
             
             # Create a manual figure instead of using px.line which can be more error-prone
             fig = go.Figure()
