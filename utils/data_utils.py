@@ -29,16 +29,60 @@ def generate_customer_data(customers, total_value):
     
     return customer_data
 
+def load_excel_data():
+    """Load data from the Excel file."""
+    try:
+        file_path = 'attached_assets/WORKHISTORY.xlsx'
+        df = pd.read_excel(file_path)
+        return df
+    except Exception as e:
+        print(f"Error loading Excel file: {e}")
+        return pd.DataFrame()  # Return empty dataframe on error
+
 def load_yearly_summary():
-    """Load yearly breakdown data."""
-    # Sample data based on patterns from provided files
-    data = [
-        {"year": "2020", "planned_hours": 4523.5, "actual_hours": 4876.2, "overrun_hours": 352.7, "ncr_hours": 125.3, "job_count": 124, "operation_count": 723, "customer_count": 18},
-        {"year": "2021", "planned_hours": 5218.8, "actual_hours": 5720.4, "overrun_hours": 501.6, "ncr_hours": 178.6, "job_count": 156, "operation_count": 892, "customer_count": 22},
-        {"year": "2022", "planned_hours": 6245.3, "actual_hours": 6780.1, "overrun_hours": 534.8, "ncr_hours": 204.5, "job_count": 192, "operation_count": 1056, "customer_count": 26},
-        {"year": "2023", "planned_hours": 7128.6, "actual_hours": 7865.9, "overrun_hours": 737.3, "ncr_hours": 245.8, "job_count": 215, "operation_count": 1225, "customer_count": 31},
-        {"year": "2024", "planned_hours": 3568.2, "actual_hours": 3960.5, "overrun_hours": 392.3, "ncr_hours": 108.2, "job_count": 98, "operation_count": 542, "customer_count": 19}
-    ]
+    """Load yearly breakdown data from the Excel file."""
+    # Load Excel file
+    df = load_excel_data()
+    
+    if df.empty:
+        print("No data found in Excel file")
+        return []
+    
+    # Get unique years from operation_finish_date
+    years = sorted(df['operation_finish_date'].dt.year.unique().tolist())
+    
+    # Calculate yearly metrics
+    data = []
+    for year in years:
+        year_df = df[df['operation_finish_date'].dt.year == year]
+        
+        # Calculate hours
+        planned_hours = year_df['planned_hours'].sum()
+        actual_hours = year_df['actual_hours'].sum()
+        overrun_hours = actual_hours - planned_hours
+        
+        # Count NCR work
+        ncr_df = year_df[year_df['work_center'] == 'NCR']
+        ncr_hours = ncr_df['actual_hours'].sum() if not ncr_df.empty else 0
+        
+        # Count jobs and operations
+        job_count = len(year_df['job_number'].unique())
+        operation_count = len(year_df)
+        
+        # Count customers
+        customer_count = len(year_df['customer_name'].unique())
+        
+        data.append({
+            "year": str(year),
+            "planned_hours": planned_hours,
+            "actual_hours": actual_hours,
+            "overrun_hours": overrun_hours,
+            "ncr_hours": ncr_hours,
+            "job_count": job_count,
+            "operation_count": operation_count,
+            "customer_count": customer_count
+        })
+    
     return data
 
 def load_summary_metrics():
@@ -76,32 +120,58 @@ def load_summary_metrics():
     }
 
 def load_customer_profitability():
-    """Load customer profitability data."""
-    # Sample customer data with list names
-    top_customers = [
-        {"name": "Aerospace Dynamics", "list_name": "Aerospace Dyn."},
-        {"name": "Precision Manufacturing", "list_name": "Precision Mfg."},
-        {"name": "Industrial Solutions", "list_name": "Ind. Solutions"},
-        {"name": "TechFab Industries", "list_name": "TechFab Ind."},
-        {"name": "Maritime Systems", "list_name": "Maritime Sys."},
-        {"name": "Defense Components", "list_name": "Def. Components"},
-        {"name": "Medical Devices Corp", "list_name": "Medical Dev."},
-        {"name": "Energy Systems Inc", "list_name": "Energy Sys."},
-        {"name": "Automotive Precision", "list_name": "Auto Precision"},
-        {"name": "Electronics Assembly", "list_name": "Electronics"}
-    ]
+    """Load customer profitability data from Excel file."""
+    # Load Excel data
+    df = load_excel_data()
     
-    # Generate profit data for top customers
+    if df.empty:
+        print("No Excel data available for customer profitability")
+        return {
+            "top_customer": "N/A",
+            "top_customer_list_name": "N/A",
+            "overrun_customer": "N/A",
+            "overrun_customer_list_name": "N/A",
+            "repeat_rate": 0,
+            "avg_margin": 0,
+            "profit_data": []
+        }
+    
+    # Get all unique customers
+    customers = df['customer_name'].unique().tolist()
+    
+    # Calculate metrics for each customer
     profit_data = []
-    for customer in top_customers:
-        planned_hours = random.uniform(200, 1200)
-        actual_hours = planned_hours * random.uniform(0.9, 1.3)  # Some under, some over
-        overrun_hours = max(0, actual_hours - planned_hours)
-        profitability = random.uniform(-15, 25)  # Some negative, most positive
+    
+    for customer_name in customers:
+        # Filter data for this customer
+        customer_df = df[df['customer_name'] == customer_name]
+        
+        # Calculate hours
+        planned_hours = customer_df['planned_hours'].sum()
+        actual_hours = customer_df['actual_hours'].sum()
+        overrun_hours = actual_hours - planned_hours
+        
+        # Calculate profitability - we'll use a proxy based on efficiency
+        # If actual < planned, they're profitable
+        if planned_hours > 0:
+            efficiency = (planned_hours / actual_hours) if actual_hours > 0 else 1.0
+            profitability = (efficiency - 0.8) * 100  # Scale to a percentage
+        else:
+            profitability = 0
+        
+        # Create abbreviated list_name
+        if len(customer_name) > 12:
+            words = customer_name.split()
+            if len(words) > 1:
+                list_name = f"{words[0][:4]}.{words[1][:3]}."
+            else:
+                list_name = customer_name[:10] + "."
+        else:
+            list_name = customer_name
         
         profit_data.append({
-            "customer": customer["name"],
-            "list_name": customer["list_name"],
+            "customer": customer_name,
+            "list_name": list_name,
             "planned_hours": planned_hours,
             "actual_hours": actual_hours,
             "overrun_hours": overrun_hours,
@@ -111,36 +181,69 @@ def load_customer_profitability():
     # Sort by profitability for proper display
     profit_data = sorted(profit_data, key=lambda x: x["profitability"], reverse=True)
     
-    # Get the most profitable customer
-    top_customer_data = profit_data[0]
+    # Default values if no data
+    top_customer_data = {"customer": "N/A", "list_name": "N/A"}
+    overrun_customer_data = {"customer": "N/A", "list_name": "N/A"}
     
-    # Get the customer with highest overrun
-    overrun_customer_data = sorted(profit_data, key=lambda x: x["overrun_hours"], reverse=True)[0]
+    # Get the most profitable customer if we have data
+    if profit_data:
+        top_customer_data = profit_data[0]
+        # Get the customer with highest overrun
+        overrun_customer_data = sorted(profit_data, key=lambda x: x["overrun_hours"], reverse=True)[0]
+    
+    # Calculate repeat rate - percentage of customers with multiple jobs
+    customer_job_counts = {}
+    for customer in customers:
+        customer_jobs = df[df['customer_name'] == customer]['job_number'].unique()
+        customer_job_counts[customer] = len(customer_jobs)
+    
+    repeat_customers = sum(1 for count in customer_job_counts.values() if count > 1)
+    repeat_rate = (repeat_customers / len(customers) * 100) if customers else 0
+    
+    # Calculate average margin based on overall efficiency
+    total_planned = df['planned_hours'].sum()
+    total_actual = df['actual_hours'].sum()
+    avg_margin = ((total_planned / total_actual) - 0.8) * 100 if total_actual > 0 else 0
     
     return {
-        "top_customer": top_customer_data["customer"],  # Most profitable customer name
-        "top_customer_list_name": top_customer_data["list_name"],  # Most profitable customer short name
-        "overrun_customer": overrun_customer_data["customer"],  # Highest overrun customer name
-        "overrun_customer_list_name": overrun_customer_data["list_name"],  # Highest overrun customer short name
-        "repeat_rate": 76.5,  # Percentage of repeat business
-        "avg_margin": 12.8,   # Average profit margin percentage
+        "top_customer": top_customer_data["customer"],
+        "top_customer_list_name": top_customer_data["list_name"],
+        "overrun_customer": overrun_customer_data["customer"],
+        "overrun_customer_list_name": overrun_customer_data["list_name"],
+        "repeat_rate": repeat_rate,
+        "avg_margin": avg_margin,
         "profit_data": profit_data
     }
 
 def load_workcenter_trends():
-    """Load work center trend data."""
-    # Sample work centers
-    work_centers = [
-        "Assembly", "Machining", "Welding", "Inspection", "Painting",
-        "Testing", "Packaging", "CNC", "Quality Control", "Finishing"
-    ]
+    """Load work center trend data from Excel file."""
+    # Load Excel data
+    df = load_excel_data()
     
-    # Generate work center data
+    if df.empty:
+        print("No Excel data available for workcenter trends")
+        return {
+            "most_used_wc": "N/A",
+            "overrun_wc": "N/A",
+            "avg_util": 0,
+            "total_wc_hours": 0,
+            "work_center_data": []
+        }
+    
+    # Get all unique work centers
+    work_centers = df['work_center'].unique().tolist()
+    
+    # Calculate metrics for each work center
     work_center_data = []
+    
     for wc in work_centers:
-        planned_hours = random.uniform(300, 1800)
-        actual_hours = planned_hours * random.uniform(0.9, 1.25)
-        overrun_hours = max(0, actual_hours - planned_hours)
+        # Filter data for this work center
+        wc_df = df[df['work_center'] == wc]
+        
+        # Calculate hours
+        planned_hours = wc_df['planned_hours'].sum()
+        actual_hours = wc_df['actual_hours'].sum()
+        overrun_hours = actual_hours - planned_hours
         
         work_center_data.append({
             "work_center": wc,
@@ -149,16 +252,31 @@ def load_workcenter_trends():
             "overrun_hours": overrun_hours
         })
     
+    # Default values if no data
+    most_used_wc = "N/A"
+    overrun_wc = "N/A"
+    total_hours = 0
+    
     # Sort by actual hours for proper display
-    work_center_data = sorted(work_center_data, key=lambda x: x["actual_hours"], reverse=True)
+    if work_center_data:
+        work_center_data = sorted(work_center_data, key=lambda x: x["actual_hours"], reverse=True)
+        
+        # Find most used and highest overrun work centers
+        most_used_wc = max(work_center_data, key=lambda x: x["actual_hours"])["work_center"]
+        overrun_candidates = [wc for wc in work_center_data if wc["overrun_hours"] > 0]
+        if overrun_candidates:
+            overrun_wc = max(overrun_candidates, key=lambda x: x["overrun_hours"])["work_center"]
+        
+        # Calculate total hours
+        total_hours = sum(wc["actual_hours"] for wc in work_center_data)
     
-    # Find most used and highest overrun work centers
-    most_used_wc = max(work_center_data, key=lambda x: x["actual_hours"])["work_center"]
-    overrun_wc = max(work_center_data, key=lambda x: x["overrun_hours"])["work_center"]
-    
-    # Calculate total hours and average utilization
-    total_hours = sum(wc["actual_hours"] for wc in work_center_data)
-    avg_util = 78.5  # Sample utilization percentage
+    # Calculate average utilization - using a proxy calculation based on planned vs actual
+    total_planned = sum(wc["planned_hours"] for wc in work_center_data) if work_center_data else 0
+    if total_planned > 0 and total_hours > 0:
+        # If actual > planned, utilization is higher
+        avg_util = min(100, (total_hours / total_planned) * 85)  # Scale to reasonable percentage
+    else:
+        avg_util = 0
     
     return {
         "most_used_wc": most_used_wc,
@@ -169,22 +287,44 @@ def load_workcenter_trends():
     }
 
 def load_year_data(year):
-    """Load detailed data for a specific year."""
+    """Load detailed data for a specific year directly from Excel data."""
     print(f"Loading data for year {year}")
     
-    # All yearly data
-    yearly_data = load_yearly_summary()
+    # Load Excel data
+    df = load_excel_data()
+    year_str = str(year)
+    
+    if df.empty:
+        print("No Excel data available")
+        return {
+            "summary": {
+                "total_planned_hours": 0,
+                "total_actual_hours": 0,
+                "total_overrun_hours": 0,
+                "ghost_hours": 0,
+                "total_ncr_hours": 0,
+                "total_planned_cost": 0,
+                "total_actual_cost": 0,
+                "opportunity_cost_dollars": 0,
+                "recommended_buffer_percent": 0,
+                "total_jobs": 0,
+                "total_operations": 0,
+                "total_unique_parts": 0
+            },
+            "quarterly_summary": [],
+            "top_overruns": [],
+            "ncr_summary": [],
+            "workcenter_summary": [],
+            "repeat_ncr_failures": [],
+            "job_adjustments": []
+        }
     
     try:
-        # Ensure year is a string for comparison
-        year_str = str(year)
+        # Filter data for the specific year
+        year_df = df[df['operation_finish_date'].dt.year == int(year)]
         
-        # Find the specific year's data
-        year_data = next((item for item in yearly_data if item.get("year") == year_str), None)
-        
-        if not year_data:
+        if year_df.empty:
             print(f"No data found for year {year}")
-            # If year not found, return empty data structure
             return {
                 "summary": {
                     "total_planned_hours": 0,
@@ -208,13 +348,18 @@ def load_year_data(year):
                 "job_adjustments": []
             }
         
-        # Safely access dictionary values
-        planned_hours = year_data.get("planned_hours", 0)
-        actual_hours = year_data.get("actual_hours", 0)
-        overrun_hours = year_data.get("overrun_hours", 0)
-        ncr_hours = year_data.get("ncr_hours", 0)
-        job_count = year_data.get("job_count", 0)
-        operation_count = year_data.get("operation_count", 0)
+        # Calculate hours
+        planned_hours = year_df['planned_hours'].sum()
+        actual_hours = year_df['actual_hours'].sum()
+        overrun_hours = actual_hours - planned_hours
+        
+        # Count NCR-related work
+        ncr_df = year_df[year_df['work_center'] == 'NCR']
+        ncr_hours = ncr_df['actual_hours'].sum() if not ncr_df.empty else 0
+        
+        # Count jobs and operations
+        job_count = len(year_df['job_number'].unique())
+        operation_count = len(year_df)
         
         # Calculate costs using $199/hour rate
         hourly_rate = 199
@@ -235,80 +380,93 @@ def load_year_data(year):
         print(f"Error processing year data: {e}")
         raise
     
-    # Create quarterly summary
+    # Create quarterly summary from actual data
     quarters = ["Q1", "Q2", "Q3", "Q4"]
     quarterly_data = []
     
-    total_planned = planned_hours
-    total_actual = actual_hours
-    total_overrun = overrun_hours
-    total_jobs = job_count
-    
-    remaining_planned = total_planned
-    remaining_actual = total_actual
-    remaining_overrun = total_overrun
-    remaining_jobs = total_jobs
-    
     for i, quarter in enumerate(quarters):
-        # For the first 3 quarters, allocate a portion of the yearly total
-        if i < 3:
-            quarter_ratio = random.uniform(0.15, 0.35)
-            quarter_planned = total_planned * quarter_ratio
-            quarter_actual = total_actual * quarter_ratio
-            quarter_overrun = total_overrun * quarter_ratio
-            quarter_jobs = int(total_jobs * quarter_ratio)
-            
-            remaining_planned -= quarter_planned
-            remaining_actual -= quarter_actual
-            remaining_overrun -= quarter_overrun
-            remaining_jobs -= quarter_jobs
+        # Get quarter number (1-4)
+        quarter_num = i + 1
+        
+        # Filter data for this quarter
+        quarter_df = year_df[year_df['operation_finish_date'].dt.quarter == quarter_num]
+        
+        if quarter_df.empty:
+            # If no data for this quarter, add zeros
+            quarterly_data.append({
+                "quarter": quarter,
+                "planned_hours": 0,
+                "actual_hours": 0,
+                "overrun_hours": 0,
+                "overrun_cost": 0,
+                "total_jobs": 0
+            })
         else:
-            # Last quarter gets the remainder
-            quarter_planned = remaining_planned
-            quarter_actual = remaining_actual
-            quarter_overrun = remaining_overrun
-            quarter_jobs = remaining_jobs
-        
-        quarterly_data.append({
-            "quarter": quarter,
-            "planned_hours": quarter_planned,
-            "actual_hours": quarter_actual,
-            "overrun_hours": quarter_overrun,
-            "overrun_cost": quarter_overrun * hourly_rate,
-            "total_jobs": quarter_jobs
-        })
+            # Calculate actual metrics for this quarter
+            quarter_planned = quarter_df['planned_hours'].sum()
+            quarter_actual = quarter_df['actual_hours'].sum()
+            quarter_overrun = quarter_actual - quarter_planned
+            quarter_overrun_cost = quarter_overrun * hourly_rate
+            quarter_jobs = len(quarter_df['job_number'].unique())
+            
+            quarterly_data.append({
+                "quarter": quarter,
+                "planned_hours": quarter_planned,
+                "actual_hours": quarter_actual,
+                "overrun_hours": quarter_overrun,
+                "overrun_cost": quarter_overrun_cost,
+                "total_jobs": quarter_jobs
+            })
     
-    # Generate top overruns
-    top_overruns = []
-    for i in range(15):  # Generate 15 top overruns
-        # Ensure year is properly formatted for job number
-        year_suffix = str(year)[-2:] if len(str(year)) >= 2 else str(year).zfill(2)
-        job_number = f"J{year_suffix}-{random.randint(1000, 9999)}"
-        part_name = f"Part-{random.choice(['A', 'B', 'C', 'D', 'E'])}{random.randint(100, 999)}"
-        work_center = random.choice(["Assembly", "Machining", "Welding", "Inspection", "CNC", "Testing"])
-        task_description = random.choice([
-            "Final Assembly", "Surface Finishing", "Quality Inspection",
-            "Component Machining", "Subassembly", "Heat Treatment",
-            "Precision Grinding", "Dimensional Inspection"
-        ])
-        
-        planned_hours = random.uniform(5, 60)
-        actual_hours = planned_hours * random.uniform(1.2, 2.5)  # Significant overruns
+    # Generate top overruns from real data
+    # Calculate overrun for each job
+    job_overruns = []
+    
+    # Group by job number and calculate totals
+    job_groups = {}
+    for _, row in year_df.iterrows():
+        job_number = row['job_number']
+        if pd.isna(job_number):
+            continue
+            
+        if job_number not in job_groups:
+            job_groups[job_number] = {
+                'planned_hours': 0,
+                'actual_hours': 0,
+                'part_name': row.get('part_name', 'Unknown Part'),
+                'work_center': row.get('work_center', 'Unknown'),
+                'task_description': row.get('task_description', '')
+            }
+            
+        job_groups[job_number]['planned_hours'] += row['planned_hours']
+        job_groups[job_number]['actual_hours'] += row['actual_hours']
+    
+    # Convert to list and calculate overruns
+    for job_number, data in job_groups.items():
+        planned_hours = data['planned_hours']
+        actual_hours = data['actual_hours']
         overrun_hours = actual_hours - planned_hours
         
-        top_overruns.append({
-            "job_number": job_number,
-            "part_name": part_name,
-            "work_center": work_center,
-            "task_description": task_description,
-            "planned_hours": planned_hours,
-            "actual_hours": actual_hours,
-            "overrun_hours": overrun_hours,
-            "overrun_cost": overrun_hours * hourly_rate
-        })
+        # Only include jobs with overruns
+        if overrun_hours > 0:
+            job_overruns.append({
+                "job_number": job_number,
+                "part_name": data['part_name'],
+                "work_center": data['work_center'],
+                "task_description": data['task_description'],
+                "planned_hours": planned_hours,
+                "actual_hours": actual_hours,
+                "overrun_hours": overrun_hours,
+                "overrun_cost": overrun_hours * hourly_rate
+            })
     
-    # Sort overruns by cost (descending)
-    top_overruns = sorted(top_overruns, key=lambda x: x["overrun_cost"], reverse=True)
+    # If we have real overruns, use them; otherwise create placeholder entries
+    if job_overruns:
+        # Sort by overrun cost (descending) and take top 15
+        top_overruns = sorted(job_overruns, key=lambda x: x["overrun_cost"], reverse=True)[:15]
+    else:
+        # If no real data with overruns, provide empty list
+        top_overruns = []
     
     # Generate NCR summary
     ncr_summary = []
@@ -328,32 +486,32 @@ def load_year_data(year):
     # Sort NCR summary by cost (descending)
     ncr_summary = sorted(ncr_summary, key=lambda x: x["total_ncr_cost"], reverse=True)
     
-    # Generate work center summary
-    work_centers = ["Assembly", "Machining", "Welding", "Inspection", "Painting", "Testing", "CNC", "Quality Control"]
+    # Generate work center summary from actual data
     workcenter_summary = []
     
-    # Distribute total hours among work centers
-    remaining_planned = planned_hours
-    remaining_actual = actual_hours
+    # Get unique work centers for this year
+    year_work_centers = year_df['work_center'].unique().tolist()
     
-    for i, wc in enumerate(work_centers):
-        # For all but the last work center, allocate a portion of the total
-        if i < len(work_centers) - 1:
-            wc_ratio = random.uniform(0.05, 0.25)
-            wc_planned = planned_hours * wc_ratio
-            wc_actual = actual_hours * wc_ratio
+    for wc in year_work_centers:
+        # Skip empty work centers
+        if not wc or pd.isna(wc):
+            continue
             
-            remaining_planned -= wc_planned
-            remaining_actual -= wc_actual
-        else:
-            # Last work center gets the remainder
-            wc_planned = remaining_planned
-            wc_actual = remaining_actual
+        # Filter data for this work center
+        wc_df = year_df[year_df['work_center'] == wc]
         
-        wc_overrun = max(0, wc_actual - wc_planned)
+        if wc_df.empty:
+            continue
+            
+        # Calculate hours
+        wc_planned = wc_df['planned_hours'].sum()
+        wc_actual = wc_df['actual_hours'].sum()
+        wc_overrun = wc_actual - wc_planned
+        wc_job_count = len(wc_df['job_number'].unique())
         
         workcenter_summary.append({
             "work_center": wc,
+            "job_count": wc_job_count,
             "planned_hours": wc_planned,
             "actual_hours": wc_actual,
             "overrun_hours": wc_overrun,
@@ -462,21 +620,50 @@ def load_metric_data(metric):
         print("No yearly data available")
         return None
     
-    # Sample customers with list names
-    customers = [
-        {"name": "Aerospace Dynamics", "list_name": "Aerospace Dyn."},
-        {"name": "Precision Manufacturing", "list_name": "Precision Mfg."},
-        {"name": "Industrial Solutions", "list_name": "Ind. Solutions"},
-        {"name": "TechFab Industries", "list_name": "TechFab Ind."},
-        {"name": "Maritime Systems", "list_name": "Maritime Sys."},
-        {"name": "Defense Components", "list_name": "Def. Components"},
-        {"name": "Medical Devices Corp", "list_name": "Medical Dev."},
-        {"name": "Energy Systems Inc", "list_name": "Energy Sys."},
-        {"name": "Automotive Precision", "list_name": "Auto Precision"},
-        {"name": "Electronics Assembly", "list_name": "Electronics"},
-        {"name": "Power Generation Ltd", "list_name": "Power Gen."},
-        {"name": "Chemical Processing Inc", "list_name": "Chemical Proc."}
-    ]
+    # Load Excel data to get actual customer names
+    df = load_excel_data()
+    
+    if df.empty:
+        # Fallback if Excel data is not available
+        customers = [
+            {"name": "Customer 1", "list_name": "Cust. 1"},
+            {"name": "Customer 2", "list_name": "Cust. 2"}
+        ]
+    else:
+        # Get unique customer names from Excel data
+        customer_names = df['customer_name'].dropna().unique().tolist()
+        
+        # Create customer objects with abbreviated list names
+        customers = []
+        for name in customer_names:
+            if pd.isna(name) or not name:
+                continue
+                
+            # Create abbreviated list_name
+            if len(name) > 12:
+                words = name.split()
+                if len(words) > 1:
+                    list_name = f"{words[0][:4]}.{words[1][:3]}."
+                else:
+                    list_name = name[:10] + "."
+            else:
+                list_name = name
+                
+            customers.append({"name": name, "list_name": list_name})
+    
+    # If we don't have enough customers, add some defaults to fill out the data
+    if len(customers) < 5:
+        default_customers = [
+            {"name": "MetalWorks", "list_name": "MetalWorks"},
+            {"name": "Precision Parts", "list_name": "Prec. Parts"},
+            {"name": "GlobalTech", "list_name": "GlobalTech"},
+            {"name": "Acme Inc", "list_name": "Acme Inc"}
+        ]
+        for c in default_customers:
+            if c["name"] not in [cust["name"] for cust in customers]:
+                customers.append(c)
+                if len(customers) >= 10:
+                    break
     
     # Work centers
     work_centers = [
