@@ -7,6 +7,28 @@ import random
 # In a real application, this would connect to a database
 # For this demo, we'll generate sample data based on the patterns in the provided files
 
+def generate_customer_data(customers, total_value):
+    """Helper function to generate customer data with list_name support"""
+    customer_data = []
+    remaining_value = total_value
+    
+    for i, customer in enumerate(customers[:-1]):
+        if i < len(customers) - 1:
+            customer_ratio = random.uniform(0.05, 0.15)
+            customer_value = total_value * customer_ratio
+            remaining_value -= customer_value
+        else:
+            customer_value = remaining_value
+        
+        customer_data.append({
+            "customer": customer["name"],
+            "list_name": customer["list_name"],
+            "value": customer_value,
+            "percent_of_total": (customer_value / total_value) * 100
+        })
+    
+    return customer_data
+
 def load_yearly_summary():
     """Load yearly breakdown data."""
     # Sample data based on patterns from provided files
@@ -151,8 +173,15 @@ def load_year_data(year):
     # All yearly data
     yearly_data = load_yearly_summary()
     
+    # Debug info
+    print(f"Loading year data for {year}")
+    print(f"Available years: {[item['year'] for item in yearly_data]}")
+    
     # Find the specific year's data
     year_data = next((item for item in yearly_data if item["year"] == str(year)), None)
+    
+    # Debug info
+    print(f"Found year data: {year_data is not None}")
     
     if not year_data:
         # If year not found, return empty data structure
@@ -410,10 +439,13 @@ def load_year_data(year):
 def load_metric_data(metric):
     """Load detailed data for a specific metric."""
     
+    # Debug information
+    print(f"Loading data for metric: {metric}")
+    
     # Yearly breakdown data (used to derive yearly metric values)
     yearly_data = load_yearly_summary()
     
-    # Sample customers with list names
+    # Sample customers with list names - IMPORTANT: This includes both full names and shortened list_names
     customers = [
         {"name": "Aerospace Dynamics", "list_name": "Aerospace Dyn."},
         {"name": "Precision Manufacturing", "list_name": "Precision Mfg."},
@@ -428,9 +460,6 @@ def load_metric_data(metric):
         {"name": "Power Generation Ltd", "list_name": "Power Gen."},
         {"name": "Chemical Processing Inc", "list_name": "Chemical Proc."}
     ]
-    
-    # Debug information - print metric
-    print(f"Loading data for metric: {metric}")
     
     # Sample work centers
     work_centers = [
