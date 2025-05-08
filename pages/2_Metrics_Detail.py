@@ -121,6 +121,9 @@ if data:
             # Print column names for debugging
             st.write("Available columns:", yearly_df.columns.tolist())
             
+            # Create a manual figure instead of using px.line which can be more error-prone
+            fig = go.Figure()
+            
             # Make sure required columns exist
             if "year" not in yearly_df.columns:
                 # Create a year column with incremental years
@@ -133,15 +136,23 @@ if data:
             elif y_column not in yearly_df.columns:
                 # Create a placeholder column if needed
                 yearly_df[y_column] = [0] * len(yearly_df)
-                
-            # Now create the figure
-            fig = px.line(
-                yearly_df, 
-                x="year", 
-                y=y_column,
-                markers=True,
+            
+            # Add the scatter trace manually
+            fig.add_trace(
+                go.Scatter(
+                    x=yearly_df["year"].tolist(),
+                    y=yearly_df[y_column].tolist(),
+                    mode="lines+markers",
+                    name=METRICS[selected_metric],
+                    line=dict(width=3)
+                )
+            )
+            
+            # Set the title and axis labels
+            fig.update_layout(
                 title=f"{METRICS[selected_metric]} by Year",
-                labels={"year": "Year", y_column: y_title}
+                xaxis_title="Year",
+                yaxis_title=y_title
             )
         
         fig.update_traces(line=dict(width=3), hovertemplate=hovertemplate)
@@ -197,14 +208,17 @@ if data:
         if "customer_data" in data and data["customer_data"]:
             customer_df = pd.DataFrame(data["customer_data"])
             
+            # Check if list_name exists in the data, otherwise use customer
+            x_column = "list_name" if "list_name" in customer_df.columns else "customer"
+            
             # Create chart
             fig = px.bar(
                 customer_df.sort_values("value", ascending=False).head(10),
-                x="customer",
+                x=x_column,
                 y="value",
                 title=f"Top 10 Customers by {METRICS[selected_metric]}",
                 labels={
-                    "customer": "Customer",
+                    x_column: "Customer",
                     "value": "Cost ($)" if "cost" in selected_metric else "Hours" if "hours" in selected_metric else "Count"
                 }
             )
@@ -222,11 +236,19 @@ if data:
             else:
                 display_customer["value"] = display_customer["value"].apply(format_number)
             
-            display_customer = display_customer.rename(columns={
-                "customer": "Customer",
+            # Build the rename dictionary dynamically based on columns
+            rename_dict = {
                 "value": "Value",
                 "percent_of_total": "% of Total"
-            })
+            }
+            
+            # Use list_name as Customer if available, otherwise use customer
+            if "list_name" in display_customer.columns:
+                rename_dict["list_name"] = "Customer"
+            elif "customer" in display_customer.columns:
+                rename_dict["customer"] = "Customer"
+                
+            display_customer = display_customer.rename(columns=rename_dict)
             
             display_customer["% of Total"] = display_customer["% of Total"].apply(lambda x: format_percent(x/100))
             

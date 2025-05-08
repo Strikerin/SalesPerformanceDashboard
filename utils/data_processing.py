@@ -55,12 +55,18 @@ def load_summary_metrics():
 
 def load_customer_profitability():
     """Load customer profitability data."""
-    # Sample customer data
+    # Sample customer data with list names
     top_customers = [
-        "Aerospace Dynamics", "Precision Manufacturing", "Industrial Solutions",
-        "TechFab Industries", "Maritime Systems", "Defense Components",
-        "Medical Devices Corp", "Energy Systems Inc", "Automotive Precision",
-        "Electronics Assembly"
+        {"name": "Aerospace Dynamics", "list_name": "Aerospace Dyn."},
+        {"name": "Precision Manufacturing", "list_name": "Precision Mfg."},
+        {"name": "Industrial Solutions", "list_name": "Ind. Solutions"},
+        {"name": "TechFab Industries", "list_name": "TechFab Ind."},
+        {"name": "Maritime Systems", "list_name": "Maritime Sys."},
+        {"name": "Defense Components", "list_name": "Def. Components"},
+        {"name": "Medical Devices Corp", "list_name": "Medical Dev."},
+        {"name": "Energy Systems Inc", "list_name": "Energy Sys."},
+        {"name": "Automotive Precision", "list_name": "Auto Precision"},
+        {"name": "Electronics Assembly", "list_name": "Electronics"}
     ]
     
     # Generate profit data for top customers
@@ -72,7 +78,8 @@ def load_customer_profitability():
         profitability = random.uniform(-15, 25)  # Some negative, most positive
         
         profit_data.append({
-            "customer": customer,
+            "customer": customer["name"],
+            "list_name": customer["list_name"],
             "planned_hours": planned_hours,
             "actual_hours": actual_hours,
             "overrun_hours": overrun_hours,
