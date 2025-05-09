@@ -118,21 +118,32 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Year selection
-current_year = datetime.now().year
-years = list(range(current_year - 5, current_year + 1))
+# Year selection - use only years that exist in the data
+from utils.data_utils import load_excel_data
+import pandas as pd
+
+# Load Excel file to get available years
+try:
+    df = load_excel_data()
+    if not df.empty and 'operation_finish_date' in df.columns:
+        available_years = sorted(df['operation_finish_date'].dt.year.unique().tolist())
+    else:
+        available_years = [2021, 2022, 2023]  # Default years if data not available
+except Exception as e:
+    # Fallback to known years
+    available_years = [2021, 2022, 2023]
 
 # Check if year was passed via URL or other mechanism
-year = st.session_state.get('selected_year', years[-1])
+default_year = available_years[-1] if available_years else 2023
+year = st.session_state.get('selected_year', default_year)
+
 year_col1, year_col2 = st.columns([3, 1])
 with year_col1:
-    year = st.selectbox("Select Year", years, index=years.index(year) if year in years else -1)
+    year = st.selectbox("Select Year", available_years, index=available_years.index(year) if year in available_years else -1)
+
 with year_col2:
-    st.markdown(f"""
-    <div style='background-color: #1E88E5; color: white; text-align: center; padding: 8px; border-radius: 5px; cursor: pointer; margin-top: 4px;'>
-        Load Year Data
-    </div>
-    """, unsafe_allow_html=True)
+    if st.button("Load Year Data", type="primary"):
+        st.session_state['selected_year'] = year
 
 # Function to create a metric card (same as in app.py)
 def metric_card(title, value, delta=None, icon=None, color="#1E88E5", help_text=None):
@@ -307,6 +318,7 @@ if data:
                 "Quarter": row.get("quarter", "Unknown")
             }
             
+            # Add planned hours with proper formatting
             if "planned_hours" in display_quarterly.columns:
                 formatted_row["Planned"] = format_number(row["planned_hours"])
             else:
