@@ -6,9 +6,7 @@ module.exports = function(app) {
     createProxyMiddleware({
       target: 'http://localhost:5001',
       changeOrigin: true,
-      pathRewrite: {
-        '^/api': '' // remove /api prefix when forwarding to the Flask API
-      },
+      logLevel: 'debug',
       onProxyReq: (proxyReq, req, res) => {
         // Log the proxied request URL
         console.log('Proxying to:', req.method, proxyReq.path);

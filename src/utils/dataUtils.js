@@ -1,6 +1,6 @@
 // API endpoints for fetching data from the Flask backend
 // Use relative URL to avoid CORS issues in Replit environment
-const API_BASE_URL = '/api';
+const API_BASE_URL = '/api'; // This will be proxied to the Flask API at http://localhost:5001
 
 // Helper to handle API errors
 const handleApiError = (error, defaultValue) => {
@@ -125,21 +125,49 @@ export const loadMetricData = async (metric) => {
 // Upload work history data
 export const uploadWorkHistory = async (file) => {
   try {
+    console.log('Uploading file:', file.name, 'Size:', file.size);
+    
     const formData = new FormData();
     formData.append('file', file);
     
+    // Log the FormData for debugging
+    console.log('FormData created with file');
+    
     const response = await fetch(`${API_BASE_URL}/upload-workhistory`, {
       method: 'POST',
-      body: formData
+      body: formData,
+      // Don't set Content-Type header, the browser will set it with the boundary
     });
     
+    console.log('Response status:', response.status);
+    
+    // First check if the response is OK
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Unknown error');
+      // Try to read the response as text first
+      const errorText = await response.text();
+      console.error('Error response from server:', errorText);
+      
+      // Try to parse as JSON if possible
+      try {
+        const errorData = JSON.parse(errorText);
+        throw new Error(errorData.error || 'Server error');
+      } catch (parseError) {
+        // If it's not JSON, just return the text
+        throw new Error(`Server error: ${errorText.substring(0, 100)}...`);
+      }
     }
     
-    return await response.json();
+    // If we get here, the response is OK
+    try {
+      const jsonData = await response.json();
+      console.log('Successfully parsed response:', jsonData);
+      return jsonData;
+    } catch (jsonError) {
+      console.error('Error parsing JSON response:', jsonError);
+      throw new Error('Invalid response format from server');
+    }
   } catch (error) {
+    console.error('Upload error:', error);
     return {
       success: false,
       message: error.message || 'Failed to upload file'
