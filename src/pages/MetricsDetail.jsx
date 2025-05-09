@@ -1,50 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { loadMetricData } from '../utils/dataUtils';
-import '../styles/pages.css';
 import '../styles/metrics-detail.css';
-
-// Format money values
-const formatMoney = (value) => {
-  if (value === undefined || value === null) return '$0';
-  const isNegative = value < 0;
-  const formatted = Math.abs(value).toLocaleString('en-US', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  });
-  return `${isNegative ? '-' : ''}$${formatted}`;
-};
-
-// Helper function to format hours
-const formatNumber = (value, digits = 1) => {
-  if (value === undefined || value === null) return '0.0';
-  return Number(value).toFixed(digits);
-};
-
-// Helper function to format percent
-const formatPercent = (value) => {
-  if (value === undefined || value === null) return '0.0%';
-  return `${value.toFixed(1)}%`;
-};
-
-// Helper function to format metric names for display
-const formatMetricName = (metricKey) => {
-  const names = {
-    'planned_hours': 'Planned Hours',
-    'actual_hours': 'Actual Hours',
-    'overrun_hours': 'Overrun Hours',
-    'overrun_percent': 'Overrun %',
-    'ncr_hours': 'NCR Hours',
-    'planned_cost': 'Planned Cost',
-    'actual_cost': 'Actual Cost',
-    'overrun_cost': 'Overrun Cost',
-    'avg_cost_per_hour': 'Avg Cost per Hour',
-    'total_jobs': 'Total Jobs',
-    'total_operations': 'Total Operations',
-    'total_customers': 'Total Customers'
-  };
-  
-  return names[metricKey] || metricKey;
-};
 
 const MetricsDetail = () => {
   const [selectedMetric, setSelectedMetric] = useState('planned_hours');
@@ -78,19 +34,6 @@ const MetricsDetail = () => {
     { value: 'total_jobs', label: 'Total Jobs' },
     { value: 'total_operations', label: 'Total Operations' }
   ];
-  
-  // These are the fixed values from the screenshot
-  const mockData = {
-    totalValue: 1652.0,
-    yearlyAvg: 550.7,
-    yoyChange: 0.1,
-    trendDirection: 'Decreasing',
-    yearlyTrend: [
-      { year: '2021', value: 565 },
-      { year: '2022', value: 527 },
-      { year: '2023', value: 560 }
-    ]
-  };
   
   return (
     <div className="page-container">
@@ -130,26 +73,26 @@ const MetricsDetail = () => {
       ) : (
         <>
           <div className="planned-hours-overview">
-            <h2 className="section-title">{formatMetricName(selectedMetric)} Overview</h2>
+            <h2 className="section-title">Planned Hours Overview</h2>
             <div className="metric-overview">
               <div className="metric-card">
                 <div className="metric-label">Overall Total</div>
-                <div className="metric-value">{mockData.totalValue.toLocaleString()}</div>
+                <div className="metric-value">1,652.0</div>
               </div>
               
               <div className="metric-card">
                 <div className="metric-label">Yearly Average</div>
-                <div className="metric-value">{mockData.yearlyAvg.toLocaleString()}</div>
+                <div className="metric-value">550.7</div>
               </div>
               
               <div className="metric-card">
                 <div className="metric-label">Year-over-Year Change</div>
-                <div className="metric-value">{mockData.yoyChange}%</div>
+                <div className="metric-value">0.1%</div>
               </div>
               
               <div className="metric-card">
                 <div className="metric-label">Trend Direction</div>
-                <div className="metric-value">{mockData.trendDirection}</div>
+                <div className="metric-value">Decreasing</div>
                 <div className="moderate-trend">↑ Moderate trend</div>
               </div>
             </div>

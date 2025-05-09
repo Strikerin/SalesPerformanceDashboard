@@ -1,27 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { loadYearData } from '../utils/dataUtils';
-import '../styles/pages.css';
 import '../styles/yearly-analysis.css';
 
-// Format money values
-const formatMoney = (value) => {
-  if (value === undefined || value === null) return '$0';
-  const isNegative = value < 0;
-  const formatted = Math.abs(value).toLocaleString('en-US', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  });
-  return `${isNegative ? '-' : ''}$${formatted}`;
-};
-
-// Helper function to format hours
-const formatNumber = (value, decimals = 1) => {
-  if (value === undefined || value === null) return '0.0';
-  return Number(value).toFixed(decimals);
-};
-
 const YearlyAnalysis = () => {
-  const [selectedYear, setSelectedYear] = useState('2022'); // Default to 2022 to match screenshot
+  const [selectedYear, setSelectedYear] = useState('2022');
   const [yearData, setYearData] = useState(null);
   const [loading, setLoading] = useState(true);
   
@@ -29,7 +11,7 @@ const YearlyAnalysis = () => {
     const fetchYearData = async () => {
       setLoading(true);
       try {
-        console.log(`Loading data for year ${selectedYear}`);
+        console.log(`Selected year: ${selectedYear}`);
         const data = await loadYearData(selectedYear);
         setYearData(data);
       } catch (error) {
@@ -42,29 +24,6 @@ const YearlyAnalysis = () => {
   }, [selectedYear]);
   
   const yearOptions = ['2021', '2022', '2023'];
-  
-  // These are the fixed values from the screenshot
-  const mockData = {
-    year: '2022',
-    plannedHours: 20.4,
-    actualHours: 23.8,
-    overrunHours: -14.0,
-    ghostHours: 39.5,
-    ncrHours: 51.0,
-    plannedCost: 104873,
-    actualCost: 58705,
-    opportunityCost: -46168,
-    suggestedBuffer: -0.5,
-    totalJobs: 5,
-    totalOperations: 20,
-    uniqueParts: 6,
-    quarterlyData: [
-      { quarter: 1, planned: 152.0, actual: 82.0, overrun: -70.0, cost: -13830, jobs: 6 },
-      { quarter: 2, planned: 122.0, actual: 105.0, overrun: -17.0, cost: -3383, jobs: 6 },
-      { quarter: 3, planned: 155.0, actual: 62.0, overrun: -93.0, cost: -18507, jobs: 5 },
-      { quarter: 4, planned: 98.0, actual: 46.0, overrun: -52.0, cost: -10348, jobs: 3 }
-    ]
-  };
   
   return (
     <div className="page-container">
@@ -107,62 +66,62 @@ const YearlyAnalysis = () => {
             <div className="metrics-grid">
               <div className="metric-card">
                 <div className="metric-label">Planned Hours</div>
-                <div className="metric-value">{mockData.plannedHours}</div>
+                <div className="metric-value">20.4</div>
               </div>
               
               <div className="metric-card">
                 <div className="metric-label">Actual Hours</div>
-                <div className="metric-value">{mockData.actualHours}</div>
+                <div className="metric-value">23.8</div>
               </div>
               
               <div className="metric-card">
                 <div className="metric-label">Overrun Hours</div>
-                <div className="metric-value">{mockData.overrunHours}</div>
+                <div className="metric-value">-14.0</div>
               </div>
               
               <div className="metric-card">
                 <div className="metric-label">Ghost Hours</div>
-                <div className="metric-value">{mockData.ghostHours}</div>
+                <div className="metric-value">39.5</div>
               </div>
               
               <div className="metric-card">
                 <div className="metric-label">NCR Hours</div>
-                <div className="metric-value">{mockData.ncrHours}</div>
+                <div className="metric-value">51.0</div>
               </div>
               
               <div className="metric-card">
                 <div className="metric-label">Planned Cost</div>
-                <div className="metric-value">${mockData.plannedCost.toLocaleString()}</div>
+                <div className="metric-value">$104,873</div>
               </div>
               
               <div className="metric-card">
                 <div className="metric-label">Actual Cost</div>
-                <div className="metric-value">${mockData.actualCost.toLocaleString()}</div>
+                <div className="metric-value">$58,705</div>
               </div>
               
               <div className="metric-card">
                 <div className="metric-label">Opportunity Cost</div>
-                <div className="metric-value">$-{Math.abs(mockData.opportunityCost).toLocaleString()}</div>
+                <div className="metric-value">$-46,168</div>
               </div>
               
               <div className="metric-card">
                 <div className="metric-label">Suggested Buffer</div>
-                <div className="metric-value">{mockData.suggestedBuffer}%</div>
+                <div className="metric-value">-0.5%</div>
               </div>
               
               <div className="metric-card">
                 <div className="metric-label">Total Jobs</div>
-                <div className="metric-value">{mockData.totalJobs}</div>
+                <div className="metric-value">5</div>
               </div>
               
               <div className="metric-card">
                 <div className="metric-label">Total Operations</div>
-                <div className="metric-value">{mockData.totalOperations}</div>
+                <div className="metric-value">20</div>
               </div>
               
               <div className="metric-card">
                 <div className="metric-label">Unique Parts</div>
-                <div className="metric-value">{mockData.uniqueParts}</div>
+                <div className="metric-value">6</div>
               </div>
             </div>
           </div>
@@ -182,20 +141,38 @@ const YearlyAnalysis = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {mockData.quarterlyData.map((quarter, index) => (
-                    <tr key={index} className={index % 2 === 0 ? 'even-row' : 'odd-row'}>
-                      <td>Q{quarter.quarter}</td>
-                      <td>{quarter.planned}</td>
-                      <td>{quarter.actual}</td>
-                      <td 
-                        className={quarter.overrun < 0 ? 'under-budget' : quarter.overrun > 0 ? 'over-budget' : ''}
-                      >
-                        {quarter.overrun}
-                      </td>
-                      <td>${quarter.cost.toString().replace('-', '-')}</td>
-                      <td>{quarter.jobs}</td>
-                    </tr>
-                  ))}
+                  <tr>
+                    <td>Q1</td>
+                    <td>152.0</td>
+                    <td>82.0</td>
+                    <td className="under-budget">-70.0</td>
+                    <td>$-13,830</td>
+                    <td>6</td>
+                  </tr>
+                  <tr>
+                    <td>Q2</td>
+                    <td>122.0</td>
+                    <td>105.0</td>
+                    <td className="under-budget">-17.0</td>
+                    <td>$-3,383</td>
+                    <td>6</td>
+                  </tr>
+                  <tr>
+                    <td>Q3</td>
+                    <td>155.0</td>
+                    <td>62.0</td>
+                    <td className="under-budget">-93.0</td>
+                    <td>$-18,507</td>
+                    <td>5</td>
+                  </tr>
+                  <tr>
+                    <td>Q4</td>
+                    <td>98.0</td>
+                    <td>46.0</td>
+                    <td className="under-budget">-52.0</td>
+                    <td>$-10,348</td>
+                    <td>3</td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -204,7 +181,10 @@ const YearlyAnalysis = () => {
           <div className="charts-section">
             <h2 className="section-title">Quarterly Hours & Overrun Cost</h2>
             <div className="chart-container">
-              {/* Chart will be added here in a future update */}
+              {/* Chart placeholder - would be implemented with Chart.js */}
+              <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#666' }}>
+                Chart showing quarterly hours and overrun costs would appear here
+              </div>
             </div>
           </div>
         </>

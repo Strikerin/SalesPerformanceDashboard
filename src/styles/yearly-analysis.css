@@ -1,10 +1,62 @@
 /* Yearly Analysis Page Styles */
+.page-container {
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.page-title .icon {
+  color: #4a86e8;
+}
+
+.page-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.year-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.year-selector label {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.year-select {
+  padding: 0.5rem;
+  min-width: 120px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  background-color: #f8f9fa;
+}
+
 .year-summary-section {
   margin-bottom: 2rem;
 }
 
 .year-summary-title {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
   color: #333;
@@ -17,10 +69,10 @@
 }
 
 .metric-card {
-  background-color: #f8f9fa;
+  background-color: #fff;
   border-radius: 8px;
   padding: 1.25rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .metric-label {
@@ -36,7 +88,6 @@
 }
 
 .quarterly-section {
-  margin-top: 2rem;
   margin-bottom: 2rem;
 }
 
@@ -49,9 +100,9 @@
 
 .table-wrapper {
   overflow-x: auto;
-  background-color: white;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
 }
 
 .data-table {
@@ -65,12 +116,12 @@
   padding: 0.75rem 1rem;
   font-weight: 600;
   color: #495057;
-  border-bottom: 2px solid #dee2e6;
+  border-bottom: 1px solid #dee2e6;
 }
 
 .data-table td {
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid #dee2e6;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .data-table tr:last-child td {
@@ -82,7 +133,7 @@
 }
 
 .odd-row {
-  background-color: white;
+  background-color: #fff;
 }
 
 .over-budget {
@@ -94,15 +145,15 @@
 }
 
 .charts-section {
-  margin-top: 2rem;
+  margin-bottom: 2rem;
 }
 
 .chart-container {
-  background-color: white;
+  background-color: #fff;
   border-radius: 8px;
   padding: 1.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  height: 300px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  min-height: 200px;
 }
 
 .page-loading {
@@ -126,19 +177,4 @@
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
-}
-
-.year-selector {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.year-select {
-  padding: 0.5rem;
-  border-radius: 4px;
-  border: 1px solid #ced4da;
-  font-size: 1rem;
-  background-color: white;
-  min-width: 120px;
 }
