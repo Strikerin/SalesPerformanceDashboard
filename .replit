@@ -1,4 +1,4 @@
-modules = ["python-3.11", "nodejs-20"]
+modules = ["python-3.11"]
 
 [nix]
 channel = "stable-24_05"
@@ -18,34 +18,17 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "React Dashboard"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Flask API"
+args = "Streamlit Server"
 
 [[workflows.workflow]]
-name = "React Dashboard"
+name = "Streamlit Server"
 author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npx react-scripts start"
+args = "streamlit run app.py --server.port 5000"
 waitForPort = 5000
-
-[[workflows.workflow]]
-name = "Flask API"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "python api.py"
-waitForPort = 5001
 
 [[ports]]
 localPort = 5000
 externalPort = 80
-
-[[ports]]
-localPort = 5001
-externalPort = 3000
