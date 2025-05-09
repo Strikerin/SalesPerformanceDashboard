@@ -16,8 +16,107 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Title and description
-st.title("📅 Yearly Analysis")
+# Add custom CSS
+with open('.streamlit/custom.css') as f:
+    st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+
+# Sidebar customization
+with st.sidebar:
+    st.image("https://raw.githubusercontent.com/yourusername/work-history-dashboard/main/logo.png", 
+             width=100, use_column_width=False)
+    st.title("Work History")
+    st.markdown("---")
+    
+    # Navigation menu with icons
+    st.markdown("""
+    <div style='margin-top: 20px;'>
+        <a href="/" style='text-decoration: none; color: #ced4da;'>
+            <div style='padding: 10px; border-radius: 5px; margin-bottom: 10px;'>
+                📊 Dashboard
+            </div>
+        </a>
+        <a href="/Yearly_Analysis" style='text-decoration: none; color: white; font-weight: bold;'>
+            <div style='background-color: rgba(255,255,255,0.1); padding: 10px; border-radius: 5px; margin-bottom: 10px;'>
+                📅 Yearly Analysis
+            </div>
+        </a>
+        <a href="/Metrics_Detail" style='text-decoration: none; color: #ced4da;'>
+            <div style='padding: 10px; border-radius: 5px; margin-bottom: 10px;'>
+                📈 Metrics Detail
+            </div>
+        </a>
+        <a href="/Upload_Data" style='text-decoration: none; color: #ced4da;'>
+            <div style='padding: 10px; border-radius: 5px; margin-bottom: 10px;'>
+                📤 Upload Data
+            </div>
+        </a>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    # User section at bottom of sidebar
+    st.markdown("""
+    <div style='position: fixed; bottom: 20px; left: 20px; color: white;'>
+        <div style='display: flex; align-items: center;'>
+            <div style='background-color: #4CAF50; width: 35px; height: 35px; border-radius: 50%; 
+                        display: flex; justify-content: center; align-items: center; margin-right: 10px;'>
+                <span style='color: white; font-weight: bold;'>AP</span>
+            </div>
+            <div>
+                <div style='font-weight: bold;'>Admin Panel</div>
+                <div style='font-size: 12px; opacity: 0.7;'>Operations Manager</div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# Header with page title and date
+st.markdown("""
+<div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;'>
+    <div>
+        <h1 style='margin-bottom: 0;'>Yearly Analysis</h1>
+        <p style='color: #6c757d; margin-top: 5px;'>Detailed breakdown by year</p>
+    </div>
+    <div style='display: flex; align-items: center;'>
+        <div style='background-color: white; border-radius: 8px; padding: 10px; margin-right: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);'>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#6c757d" class="bi bi-calendar3" viewBox="0 0 16 16">
+                <path d="M14 0H2a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zM1 3.857C1 3.384 1.448 3 2 3h12c.552 0 1 .384 1 .857v10.286c0 .473-.448.857-1 .857H2c-.552 0-1-.384-1-.857V3.857z"/>
+                <path d="M6.5 7a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-9 3a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-9 3a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
+            </svg>
+            <span style='margin-left: 5px; color: #495057;'>{}</span>
+        </div>
+        <div style='background-color: white; border-radius: 8px; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); width: 250px;'>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#6c757d" class="bi bi-search" viewBox="0 0 16 16">
+                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+            </svg>
+            <span style='margin-left: 5px; color: #6c757d;'>Search...</span>
+        </div>
+    </div>
+</div>
+""".format(datetime.now().strftime("%b %d, %Y")), unsafe_allow_html=True)
+
+# Year selection section with attractive styling
+st.markdown("""
+<div style='background-color: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 25px;'>
+    <div style='display: flex; justify-content: space-between; align-items: center;'>
+        <h3 style='margin: 0; font-size: 18px;'>Select Year for Analysis</h3>
+        <div style='display: flex; align-items: center;'>
+            <div style='background-color: #1E88E5; color: white; padding: 5px 10px; border-radius: 5px; margin-left: 10px; cursor: pointer;'>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="vertical-align: text-top;">
+                    <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>
+                    <path d="M3.5 1a.5.5 0 0 1 .5.5v13a.5.5 0 0 1-1 0v-13a.5.5 0 0 1 .5-.5z"/>
+                    <path d="M5 2.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z"/>
+                </svg>
+                <span style='margin-left: 5px;'>Export Data</span>
+            </div>
+        </div>
+    </div>
+    <div style='margin-top: 15px;'>
+        <p style='color: #6c757d; margin-bottom: 15px;'>Select a year to view detailed performance metrics and operational breakdowns.</p>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 # Year selection
 current_year = datetime.now().year
@@ -25,7 +124,64 @@ years = list(range(current_year - 5, current_year + 1))
 
 # Check if year was passed via URL or other mechanism
 year = st.session_state.get('selected_year', years[-1])
-year = st.selectbox("Select Year", years, index=years.index(year) if year in years else -1)
+year_col1, year_col2 = st.columns([3, 1])
+with year_col1:
+    year = st.selectbox("Select Year", years, index=years.index(year) if year in years else -1)
+with year_col2:
+    st.markdown(f"""
+    <div style='background-color: #1E88E5; color: white; text-align: center; padding: 8px; border-radius: 5px; cursor: pointer; margin-top: 4px;'>
+        Load Year Data
+    </div>
+    """, unsafe_allow_html=True)
+
+# Function to create a metric card (same as in app.py)
+def metric_card(title, value, delta=None, icon=None, color="#1E88E5", help_text=None):
+    delta_html = ""
+    if delta:
+        if delta.startswith("-"):
+            delta_html = f"""<div style='color: #e5383b; display: flex; align-items: center; margin-top: 5px;'>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M8 4a.5.5 0 0 1 .5.5v5.793l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L7.5 10.293V4.5A.5.5 0 0 1 8 4z"/>
+                </svg>
+                <span style='margin-left: 5px;'>{delta}</span>
+            </div>"""
+        else:
+            delta_html = f"""<div style='color: #38b000; display: flex; align-items: center; margin-top: 5px;'>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M8 12a.5.5 0 0 0 .5-.5V5.707l2.146 2.147a.5.5 0 0 0 .708-.708l-3-3a.5.5 0 0 0-.708 0l-3 3a.5.5 0 1 0 .708.708L7.5 5.707V11.5a.5.5 0 0 0 .5.5z"/>
+                </svg>
+                <span style='margin-left: 5px;'>{delta}</span>
+            </div>"""
+    
+    icon_html = ""
+    if icon:
+        icon_html = f"""<div style='background-color: {color}20; width: 40px; height: 40px; border-radius: 8px; 
+                        display: flex; justify-content: center; align-items: center; margin-right: 15px;'>
+            <span style='color: {color}; font-size: 20px;'>{icon}</span>
+        </div>"""
+    
+    help_html = ""
+    if help_text:
+        help_html = f"""<div style='position: absolute; top: 10px; right: 10px; color: #6c757d; cursor: help;' title='{help_text}'>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"/>
+            </svg>
+        </div>"""
+        
+    return f"""
+    <div style='background-color: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); height: 100%; position: relative;'>
+        {help_html}
+        <div style='display: flex; align-items: flex-start;'>
+            {icon_html}
+            <div>
+                <div style='color: #6c757d; font-size: 14px;'>{title}</div>
+                <div style='font-size: 24px; font-weight: 600; margin-top: 5px;'>{value}</div>
+                {delta_html}
+            </div>
+        </div>
+    </div>
+    """
 
 # Function to fetch and process yearly data
 @st.cache_data(ttl=3600)
@@ -37,49 +193,104 @@ def get_yearly_data(selected_year):
         st.error(f"Error loading data for year {selected_year}: {str(e)}")
         return None
 
-# Load yearly data
-data = get_yearly_data(year)
+# Load yearly data with a spinner
+with st.spinner(f"Loading data for year {year}..."):
+    data = get_yearly_data(year)
 
 if data:
     # ---- YEAR SUMMARY CARDS ----
-    st.subheader(f"Year Summary - {year}")
+    st.markdown(f"""
+    <div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; margin-top: 30px;'>
+        <h2>Year Summary - {year}</h2>
+        <div style='background-color: white; border-radius: 8px; padding: 8px 15px; 
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.05); color: #495057; font-size: 14px;'>
+            {datetime.now().strftime("%b %d, %Y")}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
     
     # Summary metrics row 1
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        st.metric("Planned Hours", format_number(data["summary"]["total_planned_hours"]))
+        st.markdown(metric_card("Planned Hours", 
+                              format_number(data["summary"]["total_planned_hours"]),
+                              icon="⏱️"), unsafe_allow_html=True)
     with col2:
-        st.metric("Actual Hours", format_number(data["summary"]["total_actual_hours"]))
+        st.markdown(metric_card("Actual Hours", 
+                              format_number(data["summary"]["total_actual_hours"]),
+                              icon="⌛"), unsafe_allow_html=True)
     with col3:
-        st.metric("Overrun Hours", format_number(data["summary"]["total_overrun_hours"]))
+        st.markdown(metric_card("Overrun Hours", 
+                              format_number(data["summary"]["total_overrun_hours"]),
+                              icon="⚠️",
+                              color="#e5383b"), unsafe_allow_html=True)
     with col4:
-        st.metric("Ghost Hours", format_number(data["summary"]["ghost_hours"]), 
-                 help="Planned time with no recorded work")
+        st.markdown(metric_card("Ghost Hours", 
+                              format_number(data["summary"]["ghost_hours"]),
+                              icon="👻",
+                              color="#6c757d",
+                              help_text="Planned time with no recorded work"), unsafe_allow_html=True)
     
     # Summary metrics row 2
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        st.metric("NCR Hours", format_number(data["summary"]["total_ncr_hours"]))
+        st.markdown(metric_card("NCR Hours", 
+                              format_number(data["summary"]["total_ncr_hours"]),
+                              icon="⚙️",
+                              color="#FFA000"), unsafe_allow_html=True)
     with col2:
-        st.metric("Planned Cost", format_money(data["summary"]["total_planned_cost"]))
+        st.markdown(metric_card("Planned Cost", 
+                              format_money(data["summary"]["total_planned_cost"]),
+                              icon="💰",
+                              color="#2E7D32"), unsafe_allow_html=True)
     with col3:
-        st.metric("Actual Cost", format_money(data["summary"]["total_actual_cost"]))
+        st.markdown(metric_card("Actual Cost", 
+                              format_money(data["summary"]["total_actual_cost"]),
+                              icon="💵",
+                              color="#2E7D32"), unsafe_allow_html=True)
     with col4:
-        st.metric("Opportunity Cost", format_money(data["summary"]["opportunity_cost_dollars"]))
+        st.markdown(metric_card("Opportunity Cost", 
+                              format_money(data["summary"]["opportunity_cost_dollars"]),
+                              icon="📉",
+                              color="#C62828"), unsafe_allow_html=True)
     
     # Summary metrics row 3
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        st.metric("Suggested Buffer", format_percent(data["summary"]["recommended_buffer_percent"]/100))
+        st.markdown(metric_card("Suggested Buffer", 
+                              format_percent(data["summary"]["recommended_buffer_percent"]/100),
+                              icon="📊",
+                              color="#673AB7"), unsafe_allow_html=True)
     with col2:
-        st.metric("Total Jobs", format_number(data["summary"]["total_jobs"], 0))
+        st.markdown(metric_card("Total Jobs", 
+                              format_number(data["summary"]["total_jobs"], 0),
+                              icon="🔧"), unsafe_allow_html=True)
     with col3:
-        st.metric("Total Operations", format_number(data["summary"]["total_operations"], 0))
+        st.markdown(metric_card("Total Operations", 
+                              format_number(data["summary"]["total_operations"], 0),
+                              icon="🏗️"), unsafe_allow_html=True)
     with col4:
-        st.metric("Unique Parts", format_number(data["summary"]["total_unique_parts"], 0))
+        st.markdown(metric_card("Unique Parts", 
+                              format_number(data["summary"]["total_unique_parts"], 0),
+                              icon="🔩"), unsafe_allow_html=True)
     
     # ---- QUARTERLY BREAKDOWN ----
-    st.subheader("Quarterly Summary")
+    st.markdown("""
+    <div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; margin-top: 30px;'>
+        <h2>Quarterly Summary</h2>
+        <div style='background-color: white; border-radius: 8px; padding: 8px 15px; 
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.05); color: #495057; font-size: 14px;'>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="vertical-align: text-top; margin-right: 5px;">
+                <path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5z"/>
+                <path d="M10 8a2 2 0 1 1-4 0V3a2 2 0 1 1 4 0v5zM8 0a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V3a3 3 0 0 0-3-3z"/>
+            </svg>
+            Record by Quarter
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Create white background container
+    st.markdown("<div style='background-color: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 30px;'>", unsafe_allow_html=True)
     
     quarterly_df = pd.DataFrame(data["quarterly_summary"])
     
@@ -129,78 +340,136 @@ if data:
         # Create an empty DataFrame with the expected columns
         display_quarterly = pd.DataFrame(columns=["Quarter", "Planned", "Actual", "Overrun", "Cost", "Jobs"])
     
-    st.dataframe(display_quarterly, use_container_width=True, hide_index=True)
+    # Create a layout with two columns
+    col1, col2 = st.columns([2, 3])
     
-    # Quarterly data processed successfully
+    with col1:
+        st.markdown("<h3 style='font-size: 18px; margin-bottom: 15px;'>Quarterly Performance</h3>", unsafe_allow_html=True)
+        st.dataframe(display_quarterly, use_container_width=True, hide_index=True)
     
-    # Check if DataFrame is empty or missing required columns
-    if quarterly_df.empty:
-        # Create a placeholder figure with a message
-        fig = go.Figure()
-        fig.add_annotation(
-            text="No quarterly data available",
-            showarrow=False,
-            font=dict(size=20)
+    with col2:
+        st.markdown("<h3 style='font-size: 18px; margin-bottom: 15px;'>Hours vs Cost</h3>", unsafe_allow_html=True)
+        
+        # Quarterly data processed successfully
+        # Check if DataFrame is empty or missing required columns
+        if quarterly_df.empty:
+            # Create a placeholder figure with a message
+            fig = go.Figure()
+            fig.add_annotation(
+                text="No quarterly data available",
+                showarrow=False,
+                font=dict(size=20)
+            )
+        else:
+            # Create quarterly visualization
+            fig = make_subplots(specs=[[{"secondary_y": True}]])
+            
+            # Get the quarter column name (might be 'Quarter' or 'quarter')
+            quarter_col = None
+            for col in quarterly_df.columns:
+                if col.lower() == 'quarter':
+                    quarter_col = col
+                    break
+            
+            # If quarter column not found, create one
+            if not quarter_col:
+                quarterly_df['Quarter'] = [f"Q{i+1}" for i in range(len(quarterly_df))]
+                quarter_col = 'Quarter'
+            
+            # Ensure all required columns exist for visualization
+            required_cols = {
+                "planned_hours": 0,
+                "actual_hours": 0,
+                "overrun_cost": 0
+            }
+            
+            for col_name, default_val in required_cols.items():
+                if col_name not in quarterly_df.columns:
+                    quarterly_df[col_name] = default_val
+            
+            # Add bar charts for hours
+            fig.add_trace(
+                go.Bar(x=quarterly_df[quarter_col], y=quarterly_df["planned_hours"], name="Planned Hours", marker_color="#1E88E5"),
+                secondary_y=False
+            )
+            
+            fig.add_trace(
+                go.Bar(x=quarterly_df[quarter_col], y=quarterly_df["actual_hours"], name="Actual Hours", marker_color="#e5383b"),
+                secondary_y=False
+            )
+            
+            # Add line for overrun cost
+            fig.add_trace(
+                go.Scatter(x=quarterly_df[quarter_col], y=quarterly_df["overrun_cost"], name="Overrun Cost", 
+                        mode="lines+markers", marker_color="#FFA000", line=dict(width=3)),
+                secondary_y=True
+            )
+        
+        # Update layout
+        fig.update_layout(
+            margin=dict(t=0, r=10, b=0, l=10),
+            barmode="group",
+            xaxis_title="Quarter",
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
         )
-    else:
-        # Create quarterly visualization
-        fig = make_subplots(specs=[[{"secondary_y": True}]])
         
-        # Get the quarter column name (might be 'Quarter' or 'quarter')
-        quarter_col = None
-        for col in quarterly_df.columns:
-            if col.lower() == 'quarter':
-                quarter_col = col
-                break
+        # Set y-axes titles - only use these if we have a subplot figure
+        if not quarterly_df.empty:
+            fig.update_yaxes(title_text="Hours", secondary_y=False)
+            fig.update_yaxes(title_text="Overrun Cost ($)", secondary_y=True)
         
-        # If quarter column not found, create one
-        if not quarter_col:
-            quarterly_df['Quarter'] = [f"Q{i+1}" for i in range(len(quarterly_df))]
-            quarter_col = 'Quarter'
-        
-        # Ensure all required columns exist for visualization
-        required_cols = {
-            "planned_hours": 0,
-            "actual_hours": 0,
-            "overrun_cost": 0
-        }
-        
-        for col_name, default_val in required_cols.items():
-            if col_name not in quarterly_df.columns:
-                quarterly_df[col_name] = default_val
-        
-        # Add bar charts for hours
-        fig.add_trace(
-            go.Bar(x=quarterly_df[quarter_col], y=quarterly_df["planned_hours"], name="Planned Hours", marker_color="#1e40af"),
-            secondary_y=False
-        )
-        
-        fig.add_trace(
-            go.Bar(x=quarterly_df[quarter_col], y=quarterly_df["actual_hours"], name="Actual Hours", marker_color="#dc2626"),
-            secondary_y=False
-        )
-        
-        # Add line for overrun cost
-        fig.add_trace(
-            go.Scatter(x=quarterly_df[quarter_col], y=quarterly_df["overrun_cost"], name="Overrun Cost", 
-                    mode="lines+markers", marker_color="#f59e0b", line=dict(width=3)),
-            secondary_y=True
-        )
+        st.plotly_chart(fig, use_container_width=True)
     
-    # Update layout
-    fig.update_layout(
-        title="Quarterly Hours & Overrun Cost",
-        barmode="group",
-        xaxis_title="Quarter",
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
-    )
-    
-    # Set y-axes titles - only use these if we have a subplot figure
+    # Add summary metrics at the bottom of the quarterly analysis
     if not quarterly_df.empty:
-        fig.update_yaxes(title_text="Hours", secondary_y=False)
-        fig.update_yaxes(title_text="Overrun Cost ($)", secondary_y=True)
+        st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
+        st.markdown("<h3 style='font-size: 18px; margin-bottom: 15px;'>Quarter-to-Quarter Performance</h3>", unsafe_allow_html=True)
+        
+        # Get the data for the first and last quarters
+        first_quarter = quarterly_df.iloc[0] if len(quarterly_df) > 0 else None
+        last_quarter = quarterly_df.iloc[-1] if len(quarterly_df) > 0 else None
+        
+        if first_quarter is not None and last_quarter is not None:
+            # Calculate the percent change
+            hours_change = ((last_quarter.get("actual_hours", 0) - first_quarter.get("actual_hours", 0)) / 
+                           first_quarter.get("actual_hours", 1)) * 100 if first_quarter.get("actual_hours", 0) > 0 else 0
+            
+            jobs_change = ((last_quarter.get("total_jobs", 0) - first_quarter.get("total_jobs", 0)) / 
+                          first_quarter.get("total_jobs", 1)) * 100 if first_quarter.get("total_jobs", 0) > 0 else 0
+            
+            cost_change = ((last_quarter.get("overrun_cost", 0) - first_quarter.get("overrun_cost", 0)) / 
+                          first_quarter.get("overrun_cost", 1)) * 100 if first_quarter.get("overrun_cost", 0) > 0 else 0
+            
+            # Create metrics with changes
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                hours_delta = format_percent(hours_change/100)
+                st.markdown(metric_card("Hours Change (Q1 to Q4)", 
+                                      format_number(last_quarter.get("actual_hours", 0) - first_quarter.get("actual_hours", 0)),
+                                      delta=hours_delta,
+                                      icon="⏱️",
+                                      color="#1E88E5"), unsafe_allow_html=True)
+            
+            with col2:
+                jobs_delta = format_percent(jobs_change/100)
+                st.markdown(metric_card("Jobs Change (Q1 to Q4)", 
+                                      format_number(last_quarter.get("total_jobs", 0) - first_quarter.get("total_jobs", 0), 0),
+                                      delta=jobs_delta,
+                                      icon="🔧",
+                                      color="#4CAF50"), unsafe_allow_html=True)
+            
+            with col3:
+                cost_delta = format_percent(cost_change/100)
+                st.markdown(metric_card("Cost Change (Q1 to Q4)", 
+                                      format_money(last_quarter.get("overrun_cost", 0) - first_quarter.get("overrun_cost", 0)),
+                                      delta=cost_delta,
+                                      icon="💵",
+                                      color="#FFA000"), unsafe_allow_html=True)
     
-    st.plotly_chart(fig, use_container_width=True)
+    st.markdown("</div>", unsafe_allow_html=True)
     
     # ---- TABBED SECTIONS ----
     tab1, tab2, tab3, tab4, tab5 = st.tabs([
