@@ -1,0 +1,351 @@
+/* App.css - Main application styles */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Color palette based on the car rental dashboard */
+  --primary: #326bf0;
+  --primary-light: #e9effd;
+  --secondary: #f8792d;
+  --success: #2ecc71;
+  --warning: #f39c12;
+  --danger: #e74c3c;
+  --dark: #1e1e2d;
+  --dark-blue: #1a2b6d;
+  --light: #f5f5fa;
+  --text-primary: #212b36;
+  --text-secondary: #637381;
+  --text-muted: #919eab;
+  --border-color: #eff2f7;
+  --card-bg: #ffffff;
+  --sidebar-bg: #172154;
+  --sidebar-active: #2c397b;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background-color: var(--light);
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.app {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  overflow-x: hidden;
+}
+
+/* Dashboard grid layout */
+.dashboard-container {
+  padding: 20px;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.dashboard-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--dark-blue);
+}
+
+.dashboard-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 20px;
+}
+
+/* Cards and widgets styling */
+.card {
+  background: var(--card-bg);
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.metrics-card {
+  grid-column: span 3;
+  display: flex;
+  flex-direction: column;
+  height: 130px;
+}
+
+.metrics-card.accent-blue {
+  border-left: 4px solid var(--primary);
+}
+
+.metrics-card.accent-orange {
+  border-left: 4px solid var(--secondary);
+}
+
+.metrics-card.accent-green {
+  border-left: 4px solid var(--success);
+}
+
+.metrics-card.accent-red {
+  border-left: 4px solid var(--danger);
+}
+
+.metric-icon {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.metrics-card.accent-blue .metric-icon {
+  background-color: var(--primary);
+}
+
+.metrics-card.accent-orange .metric-icon {
+  background-color: var(--secondary);
+}
+
+.metrics-card.accent-green .metric-icon {
+  background-color: var(--success);
+}
+
+.metrics-card.accent-red .metric-icon {
+  background-color: var(--danger);
+}
+
+.metric-title {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.metric-value {
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.metric-change {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  margin-top: auto;
+}
+
+.change-positive {
+  color: var(--success);
+}
+
+.change-negative {
+  color: var(--danger);
+}
+
+/* Chart containers */
+.chart-card {
+  grid-column: span 6;
+  height: 350px;
+}
+
+.chart-card.full-width {
+  grid-column: span 12;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.chart-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.chart-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.chart-container {
+  height: calc(100% - 50px);
+}
+
+/* Tables */
+.table-card {
+  grid-column: span 6;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th,
+.data-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+  text-align: left;
+}
+
+.data-table th {
+  background-color: var(--light);
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.data-table tr:last-child td {
+  border-bottom: none;
+}
+
+.data-table tr:hover td {
+  background-color: var(--primary-light);
+}
+
+/* Loading screen */
+.loading-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: var(--light);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: var(--primary);
+  animation: spin 1s ease-in-out infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #275ad9;
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.btn-outline:hover {
+  background-color: var(--light);
+}
+
+.btn-icon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Status indicators */
+.status {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 50px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-success {
+  background-color: rgba(46, 204, 113, 0.1);
+  color: var(--success);
+}
+
+.status-warning {
+  background-color: rgba(243, 156, 18, 0.1);
+  color: var(--warning);
+}
+
+.status-danger {
+  background-color: rgba(231, 76, 60, 0.1);
+  color: var(--danger);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .metrics-card {
+    grid-column: span 6;
+  }
+  
+  .chart-card {
+    grid-column: span 12;
+  }
+  
+  .table-card {
+    grid-column: span 12;
+  }
+}
+
+@media (max-width: 768px) {
+  .metrics-card {
+    grid-column: span 12;
+  }
+  
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .dashboard-actions {
+    width: 100%;
+  }
+}
