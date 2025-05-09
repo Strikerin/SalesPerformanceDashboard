@@ -1,0 +1,70 @@
+Uncaught runtime errors:
+×
+ERROR
+Failed to fetch
+TypeError: Failed to fetch
+    at s.fetch (chrome-extension://eppiocemhmnlbhjplcgkofciiegomcon/libs/requests.js:1:3245)
+    at window.fetch (https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:218642)
+    at loadSummaryMetrics (https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/static/js/bundle.js:58061:28)
+    at fetchData (https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/static/js/bundle.js:53507:99)
+    at https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/static/js/bundle.js:53526:5
+    at react-stack-bottom-frame (https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/static/js/bundle.js:33816:18)
+    at runWithFiberInDEV (https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/static/js/bundle.js:21735:68)
+    at commitHookEffectListMount (https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/static/js/bundle.js:26725:618)
+    at commitHookPassiveMountEffects (https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/static/js/bundle.js:26762:56)
+    at commitPassiveMountOnFiber (https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/static/js/bundle.js:27664:25)
+ERROR
+Failed to fetch
+TypeError: Failed to fetch
+    at s.fetch (chrome-extension://eppiocemhmnlbhjplcgkofciiegomcon/libs/requests.js:1:3245)
+    at window.fetch (https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:218642)
+    at loadSummaryMetrics (https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/static/js/bundle.js:58061:28)
+    at fetchData (https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/static/js/bundle.js:53507:99)
+    at https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/static/js/bundle.js:53526:5
+    at react-stack-bottom-frame (https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/static/js/bundle.js:33816:18)
+    at runWithFiberInDEV (https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/static/js/bundle.js:21735:68)
+    at commitHookEffectListMount (https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/static/js/bundle.js:26725:618)
+    at commitHookPassiveMountEffects (https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/static/js/bundle.js:26762:56)
+    at reconnectPassiveEffects (https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/static/js/bundle.js:27718:9)
+ERROR
+Failed to fetch
+TypeError: Failed to fetch
+    at s.fetch (chrome-extension://eppiocemhmnlbhjplcgkofciiegomcon/libs/requests.js:1:3245)
+    at window.fetch (https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:218642)
+    at loadYearlySummary (https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/static/js/bundle.js:58050:28)
+    at fetchData (https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/static/js/bundle.js:53508:96)
+ERROR
+Failed to fetch
+TypeError: Failed to fetch
+    at s.fetch (chrome-extension://eppiocemhmnlbhjplcgkofciiegomcon/libs/requests.js:1:3245)
+    at window.fetch (https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:218642)
+    at loadYearlySummary (https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/static/js/bundle.js:58050:28)
+    at fetchData (https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/static/js/bundle.js:53508:96)
+ERROR
+Failed to fetch
+TypeError: Failed to fetch
+    at s.fetch (chrome-extension://eppiocemhmnlbhjplcgkofciiegomcon/libs/requests.js:1:3245)
+    at window.fetch (https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:218642)
+    at loadCustomerProfitability (https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/static/js/bundle.js:58083:28)
+    at fetchData (https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/static/js/bundle.js:53509:108)
+ERROR
+Failed to fetch
+TypeError: Failed to fetch
+    at s.fetch (chrome-extension://eppiocemhmnlbhjplcgkofciiegomcon/libs/requests.js:1:3245)
+    at window.fetch (https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:218642)
+    at loadCustomerProfitability (https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/static/js/bundle.js:58083:28)
+    at fetchData (https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/static/js/bundle.js:53509:108)
+ERROR
+Failed to fetch
+TypeError: Failed to fetch
+    at s.fetch (chrome-extension://eppiocemhmnlbhjplcgkofciiegomcon/libs/requests.js:1:3245)
+    at window.fetch (https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:218642)
+    at loadWorkcenterTrends (https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/static/js/bundle.js:58102:28)
+    at fetchData (https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/static/js/bundle.js:53510:105)
+ERROR
+Failed to fetch
+TypeError: Failed to fetch
+    at s.fetch (chrome-extension://eppiocemhmnlbhjplcgkofciiegomcon/libs/requests.js:1:3245)
+    at window.fetch (https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:218642)
+    at loadWorkcenterTrends (https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/static/js/bundle.js:58102:28)
+    at fetchData (https://3e99e7b8-0fcf-4ab0-b984-0888f86f1554-00-p9xtg0qda0qh.spock.replit.dev/static/js/bundle.js:53510:105)

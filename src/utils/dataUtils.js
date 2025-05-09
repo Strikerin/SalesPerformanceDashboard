@@ -1,5 +1,6 @@
 // API endpoints for fetching data from the Flask backend
-const API_BASE_URL = 'http://localhost:5001/api';
+// Use relative URL to avoid CORS issues in Replit environment
+const API_BASE_URL = '/api';
 
 // Helper to handle API errors
 const handleApiError = (error, defaultValue) => {
