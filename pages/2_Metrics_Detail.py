@@ -401,6 +401,68 @@ if data:
             use_container_width=True,
             hide_index=True
         )
+        
+        # ---- RELATED JOBS DATA ----
+        st.subheader("Jobs Related to This Metric")
+        
+        if "related_jobs" in data and data["related_jobs"]:
+            jobs_df = pd.DataFrame(data["related_jobs"])
+            
+            # Metrics about the jobs
+            jobs_col1, jobs_col2, jobs_col3 = st.columns(3)
+            
+            with jobs_col1:
+                total_jobs = len(jobs_df)
+                st.metric("Total Related Jobs", format_number(total_jobs, 0))
+            
+            with jobs_col2:
+                if "planned_hours" in jobs_df.columns and "actual_hours" in jobs_df.columns:
+                    total_variance = (jobs_df["actual_hours"].sum() - jobs_df["planned_hours"].sum())
+                    st.metric("Total Hours Variance", format_number(total_variance))
+                else:
+                    st.metric("Total Jobs Value", format_number(jobs_df["value"].sum() if "value" in jobs_df.columns else 0))
+            
+            with jobs_col3:
+                if "planned_hours" in jobs_df.columns and "actual_hours" in jobs_df.columns and jobs_df["planned_hours"].sum() > 0:
+                    efficiency = (jobs_df["planned_hours"].sum() / jobs_df["actual_hours"].sum() * 100) if jobs_df["actual_hours"].sum() > 0 else 100
+                    st.metric("Planning Efficiency", format_percent(efficiency/100))
+                else:
+                    unique_parts = len(jobs_df["part_name"].unique()) if "part_name" in jobs_df.columns else 0
+                    st.metric("Unique Parts", format_number(unique_parts, 0))
+            
+            # Format columns for display
+            display_jobs = jobs_df.copy()
+            
+            # Format numeric columns
+            numeric_columns = ["planned_hours", "actual_hours", "overrun_hours", "labor_rate", "overrun_cost"]
+            for col in numeric_columns:
+                if col in display_jobs.columns:
+                    display_jobs[col] = display_jobs[col].apply(lambda x: format_money(x) if "cost" in col or "rate" in col else format_number(x))
+            
+            # Rename columns for better display
+            rename_dict = {
+                "job_number": "Job",
+                "part_name": "Part",
+                "customer_name": "Customer",
+                "work_center": "Work Center",
+                "task_description": "Task",
+                "planned_hours": "Planned Hours",
+                "actual_hours": "Actual Hours",
+                "overrun_hours": "Overrun",
+                "labor_rate": "Rate",
+                "overrun_cost": "Overrun Cost",
+                "operation_finish_date": "Finish Date",
+                "value": "Value"
+            }
+            
+            # Apply renames, but only for columns that exist
+            valid_renames = {k: v for k, v in rename_dict.items() if k in display_jobs.columns}
+            display_jobs = display_jobs.rename(columns=valid_renames)
+            
+            # Show the jobs data
+            st.dataframe(display_jobs, use_container_width=True, hide_index=True)
+        else:
+            st.info("No related jobs data available for this metric after correlation analysis.")
     else:
         st.info("No correlation data available for this metric.")
 else:
