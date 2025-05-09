@@ -40,6 +40,11 @@ def get_summary_metrics():
     except Exception as e:
         return custom_jsonify({"error": str(e)}), 500
 
+# Add routes without /api prefix to support proxy
+@app.route('/summary-metrics', methods=['GET'])
+def get_summary_metrics_no_prefix():
+    return get_summary_metrics()
+
 @app.route('/api/yearly-summary', methods=['GET'])
 def get_yearly_summary():
     """Get yearly summary data"""
@@ -48,6 +53,11 @@ def get_yearly_summary():
         return custom_jsonify(data)
     except Exception as e:
         return custom_jsonify({"error": str(e)}), 500
+
+# Add route without /api prefix
+@app.route('/yearly-summary', methods=['GET'])
+def get_yearly_summary_no_prefix():
+    return get_yearly_summary()
 
 @app.route('/api/customer-profitability', methods=['GET'])
 def get_customer_profitability():
@@ -58,6 +68,11 @@ def get_customer_profitability():
     except Exception as e:
         return custom_jsonify({"error": str(e)}), 500
 
+# Add route without /api prefix
+@app.route('/customer-profitability', methods=['GET'])
+def get_customer_profitability_no_prefix():
+    return get_customer_profitability()
+
 @app.route('/api/workcenter-trends', methods=['GET'])
 def get_workcenter_trends():
     """Get workcenter trends data"""
@@ -67,6 +82,11 @@ def get_workcenter_trends():
     except Exception as e:
         return custom_jsonify({"error": str(e)}), 500
 
+# Add route without /api prefix
+@app.route('/workcenter-trends', methods=['GET'])
+def get_workcenter_trends_no_prefix():
+    return get_workcenter_trends()
+
 @app.route('/api/year-data/<year>', methods=['GET'])
 def get_year_data(year):
     """Get data for a specific year"""
@@ -75,6 +95,11 @@ def get_year_data(year):
         return custom_jsonify(data)
     except Exception as e:
         return custom_jsonify({"error": str(e)}), 500
+
+# Add route without /api prefix
+@app.route('/year-data/<year>', methods=['GET'])
+def get_year_data_no_prefix(year):
+    return get_year_data(year)
 
 @app.route('/api/metric-data/<metric>', methods=['GET'])
 def get_metric_data(metric):
@@ -185,6 +210,11 @@ def get_metric_data(metric):
         print(f"Error processing metric data: {e}")
         return custom_jsonify({"error": str(e)}), 500
 
+# Add route without /api prefix
+@app.route('/metric-data/<metric>', methods=['GET'])
+def get_metric_data_no_prefix(metric):
+    return get_metric_data(metric)
+
 @app.route('/api/upload-workhistory', methods=['POST'])
 def upload_workhistory():
     """Upload and process work history data"""
@@ -222,6 +252,11 @@ def upload_workhistory():
             return custom_jsonify({"error": str(e)}), 500
     
     return custom_jsonify({"error": "Unknown error processing file"}), 500
+
+# Add route without /api prefix
+@app.route('/upload-workhistory', methods=['POST'])
+def upload_workhistory_no_prefix():
+    return upload_workhistory()
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)
