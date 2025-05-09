@@ -231,25 +231,23 @@ if data:
                                format_number(data["summary_metrics"]["total_jobs"], 0),
                                icon="🔧"), unsafe_allow_html=True)
 
-    st.markdown("<div style='height: 30px;'></div>", unsafe_allow_html=True)
+    st.write("")
+    st.write("")
     
     # ---- YEARLY BREAKDOWN SECTION ----
-    st.markdown("""
-    <div style='display: flex; justify-content: space-between; align-items: center;'>
-        <h2>Yearly Breakdown</h2>
-        <div style='background-color: white; border-radius: 8px; padding: 8px 15px; 
-                    box-shadow: 0 2px 5px rgba(0,0,0,0.05); color: #495057; font-size: 14px;'>
-            All Years ▾
-        </div>
-    </div>
-    <div style='height: 20px;'></div>
-    """, unsafe_allow_html=True)
+    col1, col2 = st.columns([4, 1])
+    with col1:
+        st.subheader("Yearly Breakdown")
+    with col2:
+        st.button("All Years ▾")
     
-    # Create a container with shadow and rounded corners
-    st.markdown("<div style='background-color: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);'>", unsafe_allow_html=True)
+    st.write("")
     
-    # Yearly table and chart side by side
-    col1, col2 = st.columns(2)
+    # Create a container with Streamlit's native card
+    with st.container():
+        
+        # Yearly table and chart side by side
+        col1, col2 = st.columns(2)
     
     with col1:
         st.markdown("<h3 style='font-size: 18px; margin-bottom: 15px;'>Year Summary</h3>", unsafe_allow_html=True)
@@ -296,19 +294,19 @@ if data:
     
     with col1:
         # ---- CUSTOMER PROFIT ANALYSIS ----
-        st.markdown("""
-        <div style='display: flex; justify-content: space-between; align-items: center;'>
-            <h2>Customer Profit Analysis</h2>
-            <div style='background-color: white; border-radius: 8px; padding: 5px 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); color: #495057; font-size: 14px;'>Filter ▾</div>
-        </div>
-        <div style='height: 20px;'></div>
-        """, unsafe_allow_html=True)
+        c_col1, c_col2 = st.columns([4, 1])
+        with c_col1:
+            st.subheader("Customer Profit Analysis")
+        with c_col2:
+            st.button("Filter ▾", key="customer_filter")
         
-        # Create a container with shadow and rounded corners
-        st.markdown("<div style='background-color: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);'>", unsafe_allow_html=True)
+        st.write("")
         
-        # Customer profit metrics
-        c1, c2 = st.columns(2)
+        # Create a container using Streamlit native container
+        with st.container():
+            
+            # Customer profit metrics
+            c1, c2 = st.columns(2)
         
         with c1:
             # Top customer card
