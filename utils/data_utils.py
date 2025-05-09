@@ -32,11 +32,88 @@ def generate_customer_data(customers, total_value):
 def load_excel_data():
     """Load data from the Excel file."""
     try:
-        file_path = 'attached_assets/WORKHISTORY.xlsx'
-        df = pd.read_excel(file_path)
-        return df
+        # Try multiple possible locations for the Excel file
+        possible_paths = [
+            'WORKHISTORY.xlsx',  # Root directory
+            'attached_assets/WORKHISTORY.xlsx',  # Assets folder
+            '../WORKHISTORY.xlsx',  # Parent directory
+            './WORKHISTORY.xlsx'   # Explicit current directory
+        ]
+        
+        # Try each path until we find the file
+        for file_path in possible_paths:
+            if os.path.exists(file_path):
+                print(f"Loading Excel data from: {file_path}")
+                df = pd.read_excel(file_path)
+                
+                # Basic preprocessing of the data
+                # Convert date columns to datetime
+                if 'basic fin. date' in df.columns:
+                    df['operation_finish_date'] = pd.to_datetime(df['basic fin. date'], errors='coerce')
+                elif 'basic_fin_date' in df.columns:
+                    df['operation_finish_date'] = pd.to_datetime(df['basic_fin_date'], errors='coerce')
+                
+                # Map column names to standard format if needed
+                column_mapping = {
+                    'sales document': 'job_number',
+                    'order': 'work_order_number',
+                    'oper./act.': 'operation_number',
+                    'oper.workcenter': 'work_center',
+                    'description': 'part_name',
+                    'opr. short text': 'task_description',
+                    'work': 'planned_hours',
+                    'actual work': 'actual_hours',
+                    'list name': 'customer_name',
+                    'basic fin. date': 'operation_finish_date'
+                }
+                
+                # Only rename columns that exist in the dataframe
+                rename_cols = {k: v for k, v in column_mapping.items() if k in df.columns}
+                df = df.rename(columns=rename_cols)
+                
+                # Convert numeric columns to float
+                numeric_cols = ['planned_hours', 'actual_hours']
+                for col in numeric_cols:
+                    if col in df.columns:
+                        df[col] = pd.to_numeric(df[col], errors='coerce')
+                
+                # Add standard labor rate if not already present
+                if 'labor_rate' not in df.columns:
+                    df['labor_rate'] = 199.0  # Standard labor rate
+                
+                # Clean up customer names if needed
+                if 'customer_name' in df.columns:
+                    df['customer_name'] = df['customer_name'].astype(str).str.strip()
+                
+                # Check if work_center includes NCR values, add dummy if not
+                if 'work_center' in df.columns:
+                    # If we don't have any NCR records, check if there's any text indicating NCR
+                    if 'NCR' not in df['work_center'].unique():
+                        # Look for work centers or task descriptions containing 'NCR', 'Nonconformance', etc.
+                        if 'task_description' in df.columns:
+                            ncr_mask = df['task_description'].astype(str).str.contains('NCR|nonconform|rework', 
+                                                                                      case=False, 
+                                                                                      na=False)
+                            # Mark these records as NCR
+                            df.loc[ncr_mask, 'work_center'] = 'NCR'
+                
+                print(f"Successfully loaded Excel data with {len(df)} records")
+                return df
+        
+        # If we've tried all paths and none worked, try to list available files
+        print("No Excel file found. Available files in current directory:")
+        print(os.listdir('.'))
+        if os.path.exists('attached_assets'):
+            print("Files in attached_assets directory:")
+            print(os.listdir('attached_assets'))
+            
+        # Return empty DataFrame as fallback
+        return pd.DataFrame()
+        
     except Exception as e:
         print(f"Error loading Excel file: {e}")
+        import traceback
+        traceback.print_exc()
         return pd.DataFrame()  # Return empty dataframe on error
 
 def load_yearly_summary():
