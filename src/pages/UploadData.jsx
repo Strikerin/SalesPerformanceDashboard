@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { uploadWorkHistory } from '../utils/dataUtils';
 import '../styles/pages.css';
 import '../styles/upload.css';
 
@@ -70,33 +71,49 @@ const UploadData = () => {
     setUploadStatus(null);
   };
   
-  // Process the uploaded file
-  const processFile = () => {
+  // Process the uploaded file using the actual API
+  const processFile = async () => {
     if (!file) return;
     
     setProcessing(true);
     
-    // Simulate API call to process the file
-    setTimeout(() => {
-      // Generate random number of records between 50 and 300
-      const recordCount = Math.floor(Math.random() * 250) + 50;
+    try {
+      // Call the API to process the file
+      const result = await uploadWorkHistory(file);
       
+      if (result.success) {
+        // Extract record count from message or use a default
+        const recordCountMatch = result.message.match(/(\d+)\s+records/);
+        const recordCount = recordCountMatch ? parseInt(recordCountMatch[1]) : 0;
+        
+        setUploadStatus({
+          success: true,
+          message: result.message,
+          records: recordCount
+        });
+        
+        // Add to upload history
+        const today = new Date().toISOString().split('T')[0];
+        setUploadHistory([
+          { date: today, filename: file.name, status: 'Completed', records: recordCount },
+          ...uploadHistory
+        ]);
+        
+        setFile(null);
+      } else {
+        setUploadStatus({
+          success: false,
+          message: result.message || 'Failed to process file.'
+        });
+      }
+    } catch (error) {
       setUploadStatus({
-        success: true,
-        message: `File uploaded successfully! ${recordCount} records processed.`,
-        records: recordCount
+        success: false,
+        message: `Error: ${error.message || 'Unknown error occurred'}`
       });
-      
-      // Add to upload history
-      const today = new Date().toISOString().split('T')[0];
-      setUploadHistory([
-        { date: today, filename: file.name, status: 'Completed', records: recordCount },
-        ...uploadHistory
-      ]);
-      
+    } finally {
       setProcessing(false);
-      setFile(null);
-    }, 2000);
+    }
   };
   
   return (
