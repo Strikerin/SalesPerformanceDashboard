@@ -516,7 +516,7 @@ if data:
             margin=dict(t=0, b=0, l=0, r=0),
             showlegend=True,
             legend=dict(
-                orientation="vertical",
+                orientation="v",
                 yanchor="middle",
                 y=0.5,
                 xanchor="center",
