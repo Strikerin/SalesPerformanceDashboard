@@ -1,9 +1,32 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response
 from flask_cors import CORS
 import json
 import os
+import numpy as np
 import pandas as pd
 from utils import data_utils
+
+# Helper function to convert NumPy types to Python native types
+def convert_numpy_types(obj):
+    if isinstance(obj, (np.integer, np.int64)):
+        return int(obj)
+    elif isinstance(obj, (np.floating, np.float64)):
+        return float(obj)
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    elif isinstance(obj, dict):
+        return {key: convert_numpy_types(value) for key, value in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_numpy_types(item) for item in obj]
+    else:
+        return obj
+
+# Custom jsonify function that handles NumPy types
+def custom_jsonify(data):
+    return Response(
+        json.dumps(convert_numpy_types(data)),
+        mimetype='application/json'
+    )
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -13,45 +36,45 @@ def get_summary_metrics():
     """Get summary metrics for dashboard"""
     try:
         metrics = data_utils.load_summary_metrics()
-        return jsonify(metrics)
+        return custom_jsonify(metrics)
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return custom_jsonify({"error": str(e)}), 500
 
 @app.route('/api/yearly-summary', methods=['GET'])
 def get_yearly_summary():
     """Get yearly summary data"""
     try:
         data = data_utils.load_yearly_summary()
-        return jsonify(data)
+        return custom_jsonify(data)
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return custom_jsonify({"error": str(e)}), 500
 
 @app.route('/api/customer-profitability', methods=['GET'])
 def get_customer_profitability():
     """Get customer profitability data"""
     try:
         data = data_utils.load_customer_profitability()
-        return jsonify(data)
+        return custom_jsonify(data)
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return custom_jsonify({"error": str(e)}), 500
 
 @app.route('/api/workcenter-trends', methods=['GET'])
 def get_workcenter_trends():
     """Get workcenter trends data"""
     try:
         data = data_utils.load_workcenter_trends()
-        return jsonify(data)
+        return custom_jsonify(data)
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return custom_jsonify({"error": str(e)}), 500
 
 @app.route('/api/year-data/<year>', methods=['GET'])
 def get_year_data(year):
     """Get data for a specific year"""
     try:
         data = data_utils.load_year_data(year)
-        return jsonify(data)
+        return custom_jsonify(data)
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return custom_jsonify({"error": str(e)}), 500
 
 @app.route('/api/metric-data/<metric>', methods=['GET'])
 def get_metric_data(metric):
@@ -157,20 +180,20 @@ def get_metric_data(metric):
             "workcenter_data": workcenter_metric_data
         }
         
-        return jsonify(result)
+        return custom_jsonify(result)
     except Exception as e:
         print(f"Error processing metric data: {e}")
-        return jsonify({"error": str(e)}), 500
+        return custom_jsonify({"error": str(e)}), 500
 
 @app.route('/api/upload-workhistory', methods=['POST'])
 def upload_workhistory():
     """Upload and process work history data"""
     if 'file' not in request.files:
-        return jsonify({"error": "No file part"}), 400
+        return custom_jsonify({"error": "No file part"}), 400
         
     file = request.files['file']
     if file.filename == '':
-        return jsonify({"error": "No selected file"}), 400
+        return custom_jsonify({"error": "No selected file"}), 400
         
     if file:
         try:
@@ -190,15 +213,15 @@ def upload_workhistory():
             except:
                 pass
                 
-            return jsonify({
+            return custom_jsonify({
                 "success": True,
                 "message": f"File processed successfully with {record_count} records."
             })
             
         except Exception as e:
-            return jsonify({"error": str(e)}), 500
+            return custom_jsonify({"error": str(e)}), 500
     
-    return jsonify({"error": "Unknown error processing file"}), 500
+    return custom_jsonify({"error": "Unknown error processing file"}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)
