@@ -31,20 +31,23 @@ def generate_customer_data(customers, total_value):
 
 def load_excel_data():
     """Load data from the Excel file."""
-    try:
-        # Try multiple possible locations for the Excel file
-        possible_paths = [
-            'WORKHISTORY.xlsx',  # Root directory
-            'attached_assets/WORKHISTORY.xlsx',  # Assets folder
-            '../WORKHISTORY.xlsx',  # Parent directory
-            './WORKHISTORY.xlsx'   # Explicit current directory
-        ]
-        
-        # Try each path until we find the file
-        for file_path in possible_paths:
-            if os.path.exists(file_path):
-                print(f"Loading Excel data from: {file_path}")
+    # Try multiple possible locations for the Excel file
+    possible_paths = [
+        'WORKHISTORY.xlsx',  # Root directory
+        'attached_assets/WORKHISTORY.xlsx',  # Assets folder
+        '../WORKHISTORY.xlsx',  # Parent directory
+        './WORKHISTORY.xlsx'   # Explicit current directory
+    ]
+    
+    for file_path in possible_paths:
+        if os.path.exists(file_path):
+            print(f"Loading Excel data from: {file_path}")
+            try:
                 df = pd.read_excel(file_path)
+                
+                if df is None or df.empty:
+                    print(f"Excel file {file_path} is empty")
+                    continue
                 
                 # Basic preprocessing of the data
                 # Convert date columns to datetime
@@ -52,6 +55,8 @@ def load_excel_data():
                     df['operation_finish_date'] = pd.to_datetime(df['basic fin. date'], errors='coerce')
                 elif 'basic_fin_date' in df.columns:
                     df['operation_finish_date'] = pd.to_datetime(df['basic_fin_date'], errors='coerce')
+                elif 'date' in df.columns:
+                    df['operation_finish_date'] = pd.to_datetime(df['date'], errors='coerce')
                 
                 # Map column names to standard format if needed
                 column_mapping = {
@@ -64,7 +69,9 @@ def load_excel_data():
                     'work': 'planned_hours',
                     'actual work': 'actual_hours',
                     'list name': 'customer_name',
-                    'basic fin. date': 'operation_finish_date'
+                    'basic fin. date': 'operation_finish_date',
+                    'job_id': 'job_number',
+                    'company_name': 'customer_name'
                 }
                 
                 # Only rename columns that exist in the dataframe
@@ -87,34 +94,42 @@ def load_excel_data():
                 
                 # Check if work_center includes NCR values, add dummy if not
                 if 'work_center' in df.columns:
+                    # Convert to string to avoid errors with missing values
+                    df['work_center'] = df['work_center'].astype(str)
                     # If we don't have any NCR records, check if there's any text indicating NCR
-                    if 'NCR' not in df['work_center'].unique():
-                        # Look for work centers or task descriptions containing 'NCR', 'Nonconformance', etc.
+                    if 'NCR' not in ' '.join(df['work_center'].tolist()):
+                        # Look for task descriptions containing 'NCR', 'Nonconformance', etc.
                         if 'task_description' in df.columns:
-                            ncr_mask = df['task_description'].astype(str).str.contains('NCR|nonconform|rework', 
-                                                                                      case=False, 
-                                                                                      na=False)
+                            df['task_description'] = df['task_description'].astype(str)
+                            ncr_mask = df['task_description'].str.contains('NCR|nonconform|rework', 
+                                                                          case=False, 
+                                                                          na=False)
                             # Mark these records as NCR
-                            df.loc[ncr_mask, 'work_center'] = 'NCR'
+                            if any(ncr_mask):
+                                df.loc[ncr_mask, 'work_center'] = 'NCR'
+                
+                # Add a year column if not present
+                if 'year' not in df.columns and 'operation_finish_date' in df.columns:
+                    df['year'] = pd.DatetimeIndex(df['operation_finish_date']).year
                 
                 print(f"Successfully loaded Excel data with {len(df)} records")
                 return df
+            except Exception as e:
+                print(f"Error processing Excel file {file_path}: {str(e)}")
+                import traceback
+                traceback.print_exc()
+                continue
+    
+    # If we've tried all paths and none worked, try to list available files
+    print("No Excel file found. Available files in current directory:")
+    print(os.listdir('.'))
+    if os.path.exists('attached_assets'):
+        print("Files in attached_assets directory:")
+        print(os.listdir('attached_assets'))
         
-        # If we've tried all paths and none worked, try to list available files
-        print("No Excel file found. Available files in current directory:")
-        print(os.listdir('.'))
-        if os.path.exists('attached_assets'):
-            print("Files in attached_assets directory:")
-            print(os.listdir('attached_assets'))
-            
-        # Return empty DataFrame as fallback
-        return pd.DataFrame()
-        
-    except Exception as e:
-        print(f"Error loading Excel file: {e}")
-        import traceback
-        traceback.print_exc()
-        return pd.DataFrame()  # Return empty dataframe on error
+    # Return empty DataFrame rather than failing
+    print("WARNING: Returning empty DataFrame as Excel file could not be found or loaded")
+    return pd.DataFrame()
 
 def load_yearly_summary():
     """Load yearly breakdown data from the Excel file."""
@@ -162,6 +177,55 @@ def load_yearly_summary():
     
     return data
 
+def load_top_overruns():
+    """Get the top overrun jobs from the dataset."""
+    # Load the Excel data
+    df = load_excel_data()
+    
+    if df.empty:
+        print("No Excel data available for top overruns")
+        return []
+    
+    # Calculate overrun for each job
+    overruns = []
+    for job_number in df['job_number'].unique():
+        job_df = df[df['job_number'] == job_number]
+        
+        # Calculate hours and cost
+        planned_hours = job_df['planned_hours'].sum()
+        actual_hours = job_df['actual_hours'].sum()
+        overrun_hours = actual_hours - planned_hours
+        
+        if overrun_hours <= 0:
+            continue  # Skip jobs with no overrun
+        
+        # Calculate overrun cost
+        hourly_rate = 199  # Standard rate
+        overrun_cost = overrun_hours * hourly_rate
+        
+        # Get part name and work center
+        part_name = job_df['part_name'].iloc[0] if 'part_name' in job_df.columns else "Unknown"
+        work_center = job_df['work_center'].iloc[0] if 'work_center' in job_df.columns else "Unknown"
+        
+        # Get a description (use the first operation's description)
+        task_description = job_df['task_description'].iloc[0] if 'task_description' in job_df.columns else ""
+        
+        overruns.append({
+            "job_number": job_number,
+            "part_name": part_name,
+            "work_center": work_center,
+            "task_description": task_description,
+            "planned_hours": planned_hours,
+            "actual_hours": actual_hours,
+            "overrun_hours": overrun_hours,
+            "overrun_cost": overrun_cost
+        })
+    
+    # Sort by overrun hours
+    overruns.sort(key=lambda x: x["overrun_hours"], reverse=True)
+    
+    return overruns
+
 def load_summary_metrics():
     """Load summary metrics for the dashboard."""
     # Calculate totals based on yearly data
@@ -173,7 +237,7 @@ def load_summary_metrics():
     total_ncr_hours = sum(item["ncr_hours"] for item in yearly_data)
     total_jobs = sum(item["job_count"] for item in yearly_data)
     total_operations = sum(item["operation_count"] for item in yearly_data)
-    total_customers = max(item["customer_count"] for item in yearly_data)  # Take max as customers may overlap years
+    total_customers = max(item["customer_count"] for item in yearly_data) if yearly_data else 0 
     
     # Calculate costs (assuming $199/hour as mentioned in notes)
     hourly_rate = 199
