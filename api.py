@@ -228,27 +228,38 @@ def upload_workhistory():
     if file:
         try:
             # Save the uploaded file temporarily
-            upload_path = 'temp_upload.xlsx'
+            upload_path = 'WORKHISTORY.xlsx'  # Use the expected filename
             file.save(upload_path)
             
-            # Process the file (for now, just loading it)
+            # Process the file - load the Excel file into a pandas DataFrame
             df = pd.read_excel(upload_path)
             record_count = len(df)
             
-            # In a real implementation, we would call data_utils.process_workhistory(upload_path)
+            # Log information about the uploaded file
+            print(f"Uploaded file: {file.filename}")
+            print(f"Records processed: {record_count}")
+            print(f"Columns in file: {', '.join(df.columns)}")
             
-            # Clean up the temporary file
-            try:
-                os.remove(upload_path)
-            except:
-                pass
-                
+            # Clean columns in the DataFrame before processing
+            if 'job_number' not in df.columns and 'JOB NUMBER' in df.columns:
+                # Convert column names to lowercase and replace spaces with underscores
+                df.columns = [col.lower().replace(' ', '_') for col in df.columns]
+            
+            # Process data with utility functions if needed
+            # If we have a process_workhistory function, we would use it here
+            # data_utils.process_workhistory(df)
+            
+            # No need to remove the file since we want to keep it for future API calls
+            
             return custom_jsonify({
                 "success": True,
-                "message": f"File processed successfully with {record_count} records."
+                "message": f"File processed successfully with {record_count} records.",
+                "record_count": record_count,
+                "columns": list(df.columns)
             })
             
         except Exception as e:
+            print(f"Error processing uploaded file: {str(e)}")
             return custom_jsonify({"error": str(e)}), 500
     
     return custom_jsonify({"error": "Unknown error processing file"}), 500
