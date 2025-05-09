@@ -66,12 +66,12 @@ const SettingsIcon = () => (
   </svg>
 );
 
-const Sidebar = () => {
-  // Simulate active link for demo
-  const [activeLink, setActiveLink] = React.useState('dashboard');
-  
-  const handleLinkClick = (link) => {
-    setActiveLink(link);
+const Sidebar = ({ activeLink = 'dashboard', onNavigate }) => {
+  // Handle navigation
+  const handleLinkClick = (link, path) => {
+    if (onNavigate) {
+      onNavigate(path);
+    }
   };
   
   return (
@@ -101,22 +101,22 @@ const Sidebar = () => {
           <div className="nav-group-title">MAIN</div>
           <ul className="nav-list">
             <li className={activeLink === 'dashboard' ? 'nav-item active' : 'nav-item'} 
-                onClick={() => handleLinkClick('dashboard')}>
+                onClick={() => handleLinkClick('dashboard', '/')}>
               <HomeIcon />
               <span>Dashboard</span>
             </li>
             <li className={activeLink === 'yearly' ? 'nav-item active' : 'nav-item'} 
-                onClick={() => handleLinkClick('yearly')}>
+                onClick={() => handleLinkClick('yearly', '/yearly-analysis')}>
               <AnalysisIcon />
               <span>Yearly Analysis</span>
             </li>
             <li className={activeLink === 'metrics' ? 'nav-item active' : 'nav-item'} 
-                onClick={() => handleLinkClick('metrics')}>
+                onClick={() => handleLinkClick('metrics', '/metrics-detail')}>
               <MetricsIcon />
               <span>Metrics Detail</span>
             </li>
             <li className={activeLink === 'upload' ? 'nav-item active' : 'nav-item'} 
-                onClick={() => handleLinkClick('upload')}>
+                onClick={() => handleLinkClick('upload', '/upload-data')}>
               <UploadIcon />
               <span>Upload Data</span>
             </li>
@@ -127,17 +127,17 @@ const Sidebar = () => {
           <div className="nav-group-title">ANALYSIS</div>
           <ul className="nav-list">
             <li className={activeLink === 'customers' ? 'nav-item active' : 'nav-item'} 
-                onClick={() => handleLinkClick('customers')}>
+                onClick={() => handleLinkClick('customers', '/customer-analysis')}>
               <CustomerIcon />
               <span>Customer Analysis</span>
             </li>
             <li className={activeLink === 'workcenters' ? 'nav-item active' : 'nav-item'} 
-                onClick={() => handleLinkClick('workcenters')}>
+                onClick={() => handleLinkClick('workcenters', '/workcenter-analysis')}>
               <WorkcenterIcon />
               <span>Workcenter Analysis</span>
             </li>
             <li className={activeLink === 'reports' ? 'nav-item active' : 'nav-item'} 
-                onClick={() => handleLinkClick('reports')}>
+                onClick={() => handleLinkClick('reports', '/monthly-report')}>
               <ReportIcon />
               <span>Monthly Reports</span>
             </li>
@@ -148,7 +148,7 @@ const Sidebar = () => {
           <div className="nav-group-title">SETTINGS</div>
           <ul className="nav-list">
             <li className={activeLink === 'settings' ? 'nav-item active' : 'nav-item'} 
-                onClick={() => handleLinkClick('settings')}>
+                onClick={() => handleLinkClick('settings', '/settings')}>
               <SettingsIcon />
               <span>System Settings</span>
             </li>
