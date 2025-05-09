@@ -1,126 +1,144 @@
 import React, { useState, useEffect } from 'react';
 import { loadYearData } from '../utils/dataUtils';
 import '../styles/pages.css';
+import '../styles/yearly-analysis.css';
 
-// Placeholder components - would be implemented fully in a complete application
-const YearSummaryMetrics = ({ data }) => (
-  <div className="metrics-row">
-    {data && (
-      <>
-        <div className="metric-box">
-          <div className="metric-title">Planned Hours</div>
-          <div className="metric-value">{data.total_planned_hours?.toFixed(1) || 0}</div>
+// Format money values
+const formatMoney = (value) => {
+  if (value === undefined || value === null) return '$0';
+  const isNegative = value < 0;
+  const formatted = Math.abs(value).toLocaleString('en-US', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  });
+  return `${isNegative ? '-' : ''}$${formatted}`;
+};
+
+// Year Summary Metrics component with improved design
+const YearSummaryMetrics = ({ data }) => {
+  if (!data) return null;
+  
+  // Helper function to format hours
+  const formatHours = (value) => {
+    if (value === undefined || value === null) return '0.0';
+    return value.toFixed(1);
+  };
+  
+  return (
+    <div className="year-summary-section">
+      <h2 className="year-summary-title">Year Summary - {data.year || ''}</h2>
+      
+      <div className="metrics-grid">
+        <div className="metric-card">
+          <div className="metric-label">Planned Hours</div>
+          <div className="metric-value">{formatHours(data.total_planned_hours)}</div>
         </div>
-        <div className="metric-box">
-          <div className="metric-title">Actual Hours</div>
-          <div className="metric-value">{data.total_actual_hours?.toFixed(1) || 0}</div>
+        
+        <div className="metric-card">
+          <div className="metric-label">Actual Hours</div>
+          <div className="metric-value">{formatHours(data.total_actual_hours)}</div>
         </div>
-        <div className="metric-box">
-          <div className="metric-title">Overrun Hours</div>
-          <div className="metric-value">{data.total_overrun_hours?.toFixed(1) || 0}</div>
+        
+        <div className="metric-card">
+          <div className="metric-label">Overrun Hours</div>
+          <div className="metric-value">{formatHours(data.total_overrun_hours)}</div>
         </div>
-        <div className="metric-box">
-          <div className="metric-title">Total Jobs</div>
+        
+        <div className="metric-card">
+          <div className="metric-label">Ghost Hours</div>
+          <div className="metric-value">{formatHours(data.ghost_hours)}</div>
+        </div>
+        
+        <div className="metric-card">
+          <div className="metric-label">NCR Hours</div>
+          <div className="metric-value">{formatHours(data.total_ncr_hours)}</div>
+        </div>
+        
+        <div className="metric-card">
+          <div className="metric-label">Planned Cost</div>
+          <div className="metric-value">{formatMoney(data.total_planned_cost)}</div>
+        </div>
+        
+        <div className="metric-card">
+          <div className="metric-label">Actual Cost</div>
+          <div className="metric-value">{formatMoney(data.total_actual_cost)}</div>
+        </div>
+        
+        <div className="metric-card">
+          <div className="metric-label">Opportunity Cost</div>
+          <div className="metric-value">{formatMoney(data.opportunity_cost_dollars)}</div>
+        </div>
+        
+        <div className="metric-card">
+          <div className="metric-label">Suggested Buffer</div>
+          <div className="metric-value">{data.recommended_buffer_percent ? `${data.recommended_buffer_percent.toFixed(1)}%` : '-0.5%'}</div>
+        </div>
+        
+        <div className="metric-card">
+          <div className="metric-label">Total Jobs</div>
           <div className="metric-value">{data.total_jobs || 0}</div>
         </div>
-      </>
-    )}
-  </div>
-);
+        
+        <div className="metric-card">
+          <div className="metric-label">Total Operations</div>
+          <div className="metric-value">{data.total_operations || 0}</div>
+        </div>
+        
+        <div className="metric-card">
+          <div className="metric-label">Unique Parts</div>
+          <div className="metric-value">{data.total_unique_parts || 0}</div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const QuarterlyBreakdown = ({ data }) => (
-  <div className="table-wrapper">
-    <table className="data-table">
-      <thead>
-        <tr>
-          <th>Quarter</th>
-          <th>Planned Hours</th>
-          <th>Actual Hours</th>
-          <th>Overrun Hours</th>
-          <th>Jobs</th>
-        </tr>
-      </thead>
-      <tbody>
-        {data && data.map((quarter, index) => (
-          <tr key={index}>
-            <td>{quarter.quarter}</td>
-            <td>{quarter.planned_hours?.toFixed(1) || 0}</td>
-            <td>{quarter.actual_hours?.toFixed(1) || 0}</td>
-            <td>{quarter.overrun_hours?.toFixed(1) || 0}</td>
-            <td>{quarter.total_jobs || 0}</td>
+  <div className="quarterly-section">
+    <h2 className="section-title">Quarterly Summary</h2>
+    <div className="table-wrapper">
+      <table className="data-table">
+        <thead>
+          <tr>
+            <th>Quarter</th>
+            <th>Planned</th>
+            <th>Actual</th>
+            <th>Overrun</th>
+            <th>Cost</th>
+            <th>Jobs</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-);
-
-const TopOverrunJobs = ({ data }) => (
-  <div className="table-wrapper">
-    <table className="data-table">
-      <thead>
-        <tr>
-          <th>Job Number</th>
-          <th>Part Name</th>
-          <th>Work Center</th>
-          <th>Planned Hours</th>
-          <th>Actual Hours</th>
-          <th>Overrun Hours</th>
-        </tr>
-      </thead>
-      <tbody>
-        {data && data.map((job, index) => (
-          <tr key={index}>
-            <td>{job.job_number}</td>
-            <td>{job.part_name}</td>
-            <td>{job.work_center}</td>
-            <td>{job.planned_hours?.toFixed(1) || 0}</td>
-            <td>{job.actual_hours?.toFixed(1) || 0}</td>
-            <td>{job.overrun_hours?.toFixed(1) || 0}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-);
-
-const WorkcenterSummary = ({ data }) => (
-  <div className="table-wrapper">
-    <table className="data-table">
-      <thead>
-        <tr>
-          <th>Work Center</th>
-          <th>Job Count</th>
-          <th>Planned Hours</th>
-          <th>Actual Hours</th>
-          <th>Overrun Hours</th>
-        </tr>
-      </thead>
-      <tbody>
-        {data && data.map((wc, index) => (
-          <tr key={index}>
-            <td>{wc.work_center}</td>
-            <td>{wc.job_count || 0}</td>
-            <td>{wc.planned_hours?.toFixed(1) || 0}</td>
-            <td>{wc.actual_hours?.toFixed(1) || 0}</td>
-            <td>{wc.overrun_hours?.toFixed(1) || 0}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {data && data.map((quarter, index) => (
+            <tr key={index} className={index % 2 === 0 ? 'even-row' : 'odd-row'}>
+              <td>Q{quarter.quarter}</td>
+              <td>{quarter.planned_hours?.toFixed(1) || 0}</td>
+              <td>{quarter.actual_hours?.toFixed(1) || 0}</td>
+              <td 
+                className={quarter.overrun_hours < 0 ? 'under-budget' : quarter.overrun_hours > 0 ? 'over-budget' : ''}
+              >
+                {quarter.overrun_hours?.toFixed(1) || 0}
+              </td>
+              <td>{formatMoney(quarter.overrun_cost)}</td>
+              <td>{quarter.total_jobs || 0}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   </div>
 );
 
 const YearlyAnalysis = () => {
-  const [selectedYear, setSelectedYear] = useState('2023');
+  const [selectedYear, setSelectedYear] = useState('2022'); // Default to 2022 to match screenshot
   const [yearData, setYearData] = useState(null);
-  const [activeTab, setActiveTab] = useState('summary');
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
     const fetchYearData = async () => {
       setLoading(true);
       try {
+        console.log(`Loading data for year ${selectedYear}`);
         const data = await loadYearData(selectedYear);
         setYearData(data);
       } catch (error) {
@@ -137,10 +155,18 @@ const YearlyAnalysis = () => {
   return (
     <div className="page-container">
       <div className="page-header">
-        <h1 className="page-title">Yearly Analysis</h1>
+        <h1 className="page-title">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          Yearly Analysis
+        </h1>
         <div className="page-actions">
           <div className="year-selector">
-            <label>Year:</label>
+            <label>Select Year</label>
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(e.target.value)}
@@ -151,14 +177,6 @@ const YearlyAnalysis = () => {
               ))}
             </select>
           </div>
-          <button className="btn btn-outline btn-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="7 10 12 15 17 10"></polyline>
-              <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-            <span>Export</span>
-          </button>
         </div>
       </div>
       
@@ -171,49 +189,12 @@ const YearlyAnalysis = () => {
         <>
           <YearSummaryMetrics data={yearData?.summary} />
           
-          <div className="tabs">
-            <div className="tab-header">
-              <button 
-                className={`tab-button ${activeTab === 'summary' ? 'active' : ''}`}
-                onClick={() => setActiveTab('summary')}
-              >
-                Quarterly Summary
-              </button>
-              <button 
-                className={`tab-button ${activeTab === 'overruns' ? 'active' : ''}`}
-                onClick={() => setActiveTab('overruns')}
-              >
-                Top Overruns
-              </button>
-              <button 
-                className={`tab-button ${activeTab === 'workcenters' ? 'active' : ''}`}
-                onClick={() => setActiveTab('workcenters')}
-              >
-                Work Centers
-              </button>
-            </div>
-            
-            <div className="tab-content">
-              {activeTab === 'summary' && (
-                <div className="tab-pane">
-                  <h2 className="section-title">Quarterly Breakdown</h2>
-                  <QuarterlyBreakdown data={yearData?.quarterly_summary} />
-                </div>
-              )}
-              
-              {activeTab === 'overruns' && (
-                <div className="tab-pane">
-                  <h2 className="section-title">Top Overrun Jobs</h2>
-                  <TopOverrunJobs data={yearData?.top_overruns?.slice(0, 10)} />
-                </div>
-              )}
-              
-              {activeTab === 'workcenters' && (
-                <div className="tab-pane">
-                  <h2 className="section-title">Work Center Performance</h2>
-                  <WorkcenterSummary data={yearData?.workcenter_summary} />
-                </div>
-              )}
+          <QuarterlyBreakdown data={yearData?.quarterly_summary} />
+          
+          <div className="charts-section">
+            <h2 className="section-title">Quarterly Hours & Overrun Cost</h2>
+            <div className="chart-container">
+              {/* Chart will be added here in a future update */}
             </div>
           </div>
         </>
