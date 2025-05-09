@@ -36,7 +36,7 @@ with st.sidebar:
     st.divider()
     
     # Navigation menu
-    st.page_link("/", label="📊 Dashboard", icon="dashboard")
+    st.page_link("/", label="📊 Dashboard")
     st.page_link("/Yearly_Analysis", label="📅 Yearly Analysis")
     st.page_link("/Metrics_Detail", label="📈 Metrics Detail")
     st.page_link("/Upload_Data", label="📤 Upload Data")
