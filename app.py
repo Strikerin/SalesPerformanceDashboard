@@ -33,8 +33,7 @@ with open('.streamlit/custom.css') as f:
 
 # Sidebar customization
 with st.sidebar:
-    st.image("https://raw.githubusercontent.com/yourusername/work-history-dashboard/main/logo.png", 
-             width=100, use_column_width=False)
+    st.image("generated-icon.png", width=100, use_container_width=False)
     st.title("Work History")
     st.markdown("---")
     
