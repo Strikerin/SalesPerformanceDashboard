@@ -1,11 +1,15 @@
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
 module.exports = function(app) {
+  // Setup proxy with path rewrite to remove '/api' prefix when forwarding to backend
   app.use(
     '/api',
     createProxyMiddleware({
       target: 'http://localhost:5001',
       changeOrigin: true,
+      pathRewrite: {
+        '^/api': '' // Remove '/api' prefix when forwarding to backend
+      },
       logLevel: 'debug',
       onProxyReq: (proxyReq, req, res) => {
         // Log the proxied request URL
