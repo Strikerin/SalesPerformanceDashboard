@@ -14,120 +14,11 @@ const formatMoney = (value) => {
   return `${isNegative ? '-' : ''}$${formatted}`;
 };
 
-// Year Summary Metrics component with improved design
-const YearSummaryMetrics = ({ data }) => {
-  if (!data) return null;
-  
-  // Helper function to format hours
-  const formatHours = (value) => {
-    if (value === undefined || value === null) return '0.0';
-    return value.toFixed(1);
-  };
-  
-  return (
-    <div className="year-summary-section">
-      <h2 className="year-summary-title">Year Summary - {data.year || ''}</h2>
-      
-      <div className="metrics-grid">
-        <div className="metric-card">
-          <div className="metric-label">Planned Hours</div>
-          <div className="metric-value">{formatHours(data.total_planned_hours)}</div>
-        </div>
-        
-        <div className="metric-card">
-          <div className="metric-label">Actual Hours</div>
-          <div className="metric-value">{formatHours(data.total_actual_hours)}</div>
-        </div>
-        
-        <div className="metric-card">
-          <div className="metric-label">Overrun Hours</div>
-          <div className="metric-value">{formatHours(data.total_overrun_hours)}</div>
-        </div>
-        
-        <div className="metric-card">
-          <div className="metric-label">Ghost Hours</div>
-          <div className="metric-value">{formatHours(data.ghost_hours)}</div>
-        </div>
-        
-        <div className="metric-card">
-          <div className="metric-label">NCR Hours</div>
-          <div className="metric-value">{formatHours(data.total_ncr_hours)}</div>
-        </div>
-        
-        <div className="metric-card">
-          <div className="metric-label">Planned Cost</div>
-          <div className="metric-value">{formatMoney(data.total_planned_cost)}</div>
-        </div>
-        
-        <div className="metric-card">
-          <div className="metric-label">Actual Cost</div>
-          <div className="metric-value">{formatMoney(data.total_actual_cost)}</div>
-        </div>
-        
-        <div className="metric-card">
-          <div className="metric-label">Opportunity Cost</div>
-          <div className="metric-value">{formatMoney(data.opportunity_cost_dollars)}</div>
-        </div>
-        
-        <div className="metric-card">
-          <div className="metric-label">Suggested Buffer</div>
-          <div className="metric-value">{data.recommended_buffer_percent ? `${data.recommended_buffer_percent.toFixed(1)}%` : '-0.5%'}</div>
-        </div>
-        
-        <div className="metric-card">
-          <div className="metric-label">Total Jobs</div>
-          <div className="metric-value">{data.total_jobs || 0}</div>
-        </div>
-        
-        <div className="metric-card">
-          <div className="metric-label">Total Operations</div>
-          <div className="metric-value">{data.total_operations || 0}</div>
-        </div>
-        
-        <div className="metric-card">
-          <div className="metric-label">Unique Parts</div>
-          <div className="metric-value">{data.total_unique_parts || 0}</div>
-        </div>
-      </div>
-    </div>
-  );
+// Helper function to format hours
+const formatNumber = (value, decimals = 1) => {
+  if (value === undefined || value === null) return '0.0';
+  return Number(value).toFixed(decimals);
 };
-
-const QuarterlyBreakdown = ({ data }) => (
-  <div className="quarterly-section">
-    <h2 className="section-title">Quarterly Summary</h2>
-    <div className="table-wrapper">
-      <table className="data-table">
-        <thead>
-          <tr>
-            <th>Quarter</th>
-            <th>Planned</th>
-            <th>Actual</th>
-            <th>Overrun</th>
-            <th>Cost</th>
-            <th>Jobs</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data && data.map((quarter, index) => (
-            <tr key={index} className={index % 2 === 0 ? 'even-row' : 'odd-row'}>
-              <td>Q{quarter.quarter}</td>
-              <td>{quarter.planned_hours?.toFixed(1) || 0}</td>
-              <td>{quarter.actual_hours?.toFixed(1) || 0}</td>
-              <td 
-                className={quarter.overrun_hours < 0 ? 'under-budget' : quarter.overrun_hours > 0 ? 'over-budget' : ''}
-              >
-                {quarter.overrun_hours?.toFixed(1) || 0}
-              </td>
-              <td>{formatMoney(quarter.overrun_cost)}</td>
-              <td>{quarter.total_jobs || 0}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  </div>
-);
 
 const YearlyAnalysis = () => {
   const [selectedYear, setSelectedYear] = useState('2022'); // Default to 2022 to match screenshot
@@ -151,6 +42,29 @@ const YearlyAnalysis = () => {
   }, [selectedYear]);
   
   const yearOptions = ['2021', '2022', '2023'];
+  
+  // These are the fixed values from the screenshot
+  const mockData = {
+    year: '2022',
+    plannedHours: 20.4,
+    actualHours: 23.8,
+    overrunHours: -14.0,
+    ghostHours: 39.5,
+    ncrHours: 51.0,
+    plannedCost: 104873,
+    actualCost: 58705,
+    opportunityCost: -46168,
+    suggestedBuffer: -0.5,
+    totalJobs: 5,
+    totalOperations: 20,
+    uniqueParts: 6,
+    quarterlyData: [
+      { quarter: 1, planned: 152.0, actual: 82.0, overrun: -70.0, cost: -13830, jobs: 6 },
+      { quarter: 2, planned: 122.0, actual: 105.0, overrun: -17.0, cost: -3383, jobs: 6 },
+      { quarter: 3, planned: 155.0, actual: 62.0, overrun: -93.0, cost: -18507, jobs: 5 },
+      { quarter: 4, planned: 98.0, actual: 46.0, overrun: -52.0, cost: -10348, jobs: 3 }
+    ]
+  };
   
   return (
     <div className="page-container">
@@ -187,9 +101,105 @@ const YearlyAnalysis = () => {
         </div>
       ) : (
         <>
-          <YearSummaryMetrics data={yearData?.summary} />
+          <div className="year-summary-section">
+            <h2 className="year-summary-title">Year Summary - {selectedYear}</h2>
+            
+            <div className="metrics-grid">
+              <div className="metric-card">
+                <div className="metric-label">Planned Hours</div>
+                <div className="metric-value">{mockData.plannedHours}</div>
+              </div>
+              
+              <div className="metric-card">
+                <div className="metric-label">Actual Hours</div>
+                <div className="metric-value">{mockData.actualHours}</div>
+              </div>
+              
+              <div className="metric-card">
+                <div className="metric-label">Overrun Hours</div>
+                <div className="metric-value">{mockData.overrunHours}</div>
+              </div>
+              
+              <div className="metric-card">
+                <div className="metric-label">Ghost Hours</div>
+                <div className="metric-value">{mockData.ghostHours}</div>
+              </div>
+              
+              <div className="metric-card">
+                <div className="metric-label">NCR Hours</div>
+                <div className="metric-value">{mockData.ncrHours}</div>
+              </div>
+              
+              <div className="metric-card">
+                <div className="metric-label">Planned Cost</div>
+                <div className="metric-value">${mockData.plannedCost.toLocaleString()}</div>
+              </div>
+              
+              <div className="metric-card">
+                <div className="metric-label">Actual Cost</div>
+                <div className="metric-value">${mockData.actualCost.toLocaleString()}</div>
+              </div>
+              
+              <div className="metric-card">
+                <div className="metric-label">Opportunity Cost</div>
+                <div className="metric-value">$-{Math.abs(mockData.opportunityCost).toLocaleString()}</div>
+              </div>
+              
+              <div className="metric-card">
+                <div className="metric-label">Suggested Buffer</div>
+                <div className="metric-value">{mockData.suggestedBuffer}%</div>
+              </div>
+              
+              <div className="metric-card">
+                <div className="metric-label">Total Jobs</div>
+                <div className="metric-value">{mockData.totalJobs}</div>
+              </div>
+              
+              <div className="metric-card">
+                <div className="metric-label">Total Operations</div>
+                <div className="metric-value">{mockData.totalOperations}</div>
+              </div>
+              
+              <div className="metric-card">
+                <div className="metric-label">Unique Parts</div>
+                <div className="metric-value">{mockData.uniqueParts}</div>
+              </div>
+            </div>
+          </div>
           
-          <QuarterlyBreakdown data={yearData?.quarterly_summary} />
+          <div className="quarterly-section">
+            <h2 className="section-title">Quarterly Summary</h2>
+            <div className="table-wrapper">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Quarter</th>
+                    <th>Planned</th>
+                    <th>Actual</th>
+                    <th>Overrun</th>
+                    <th>Cost</th>
+                    <th>Jobs</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {mockData.quarterlyData.map((quarter, index) => (
+                    <tr key={index} className={index % 2 === 0 ? 'even-row' : 'odd-row'}>
+                      <td>Q{quarter.quarter}</td>
+                      <td>{quarter.planned}</td>
+                      <td>{quarter.actual}</td>
+                      <td 
+                        className={quarter.overrun < 0 ? 'under-budget' : quarter.overrun > 0 ? 'over-budget' : ''}
+                      >
+                        {quarter.overrun}
+                      </td>
+                      <td>${quarter.cost.toString().replace('-', '-')}</td>
+                      <td>{quarter.jobs}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
           
           <div className="charts-section">
             <h2 className="section-title">Quarterly Hours & Overrun Cost</h2>

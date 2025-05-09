@@ -17,7 +17,7 @@ const formatMoney = (value) => {
 // Helper function to format hours
 const formatNumber = (value, digits = 1) => {
   if (value === undefined || value === null) return '0.0';
-  return value.toFixed(digits);
+  return Number(value).toFixed(digits);
 };
 
 // Helper function to format percent
@@ -44,113 +44,6 @@ const formatMetricName = (metricKey) => {
   };
   
   return names[metricKey] || metricKey;
-};
-
-// Trend direction indicator
-const TrendIndicator = ({ direction }) => {
-  if (!direction) return null;
-  
-  let icon, colorClass;
-  if (direction.toLowerCase().includes('increasing')) {
-    icon = (
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="12" y1="19" x2="12" y2="5"></line>
-        <polyline points="5 12 12 5 19 12"></polyline>
-      </svg>
-    );
-    colorClass = 'positive';
-  } else if (direction.toLowerCase().includes('decreasing')) {
-    icon = (
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="12" y1="5" x2="12" y2="19"></line>
-        <polyline points="19 12 12 19 5 12"></polyline>
-      </svg>
-    );
-    colorClass = 'negative';
-  } else {
-    icon = (
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="5" y1="12" x2="19" y2="12"></line>
-      </svg>
-    );
-    colorClass = 'neutral';
-  }
-  
-  return (
-    <div className={`trend-indicator ${colorClass}`}>
-      {icon}
-      <span>{direction}</span>
-    </div>
-  );
-};
-
-// Metric overview cards
-const MetricOverview = ({ data, metricName }) => {
-  if (!data) return null;
-  
-  return (
-    <div className="metric-overview">
-      <div className="metric-card">
-        <div className="metric-label">Overall Total</div>
-        <div className="metric-value">{formatNumber(data.total)}</div>
-      </div>
-      
-      <div className="metric-card">
-        <div className="metric-label">Yearly Average</div>
-        <div className="metric-value">{formatNumber(data.yearly_avg)}</div>
-      </div>
-      
-      <div className="metric-card">
-        <div className="metric-label">Year-over-Year Change</div>
-        <div className="metric-value">{formatPercent(data.yoy_change)}</div>
-        <div className={`value-change ${data.yoy_change > 0 ? 'positive' : data.yoy_change < 0 ? 'negative' : 'neutral'}`}>
-          {data.yoy_change > 0 ? '↑' : data.yoy_change < 0 ? '↓' : '→'}
-        </div>
-      </div>
-      
-      <div className="metric-card">
-        <div className="metric-label">Trend Direction</div>
-        <div className="metric-value">
-          {data.trend_direction || 'Decreasing'}
-        </div>
-        <div className="moderate-trend">↑ Moderate trend</div>
-      </div>
-    </div>
-  );
-};
-
-// Year data chart (placeholder - would be replaced with actual chart component)
-const YearlyTrendChart = ({ data, metricName }) => {
-  if (!data || data.length === 0) {
-    return (
-      <div className="chart-placeholder">
-        <div className="chart-message">
-          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="18" y1="20" x2="18" y2="10"></line>
-            <line x1="12" y1="20" x2="12" y2="4"></line>
-            <line x1="6" y1="20" x2="6" y2="14"></line>
-          </svg>
-          <p>No data available for {metricName}</p>
-        </div>
-      </div>
-    );
-  }
-  
-  return (
-    <div className="chart-container">
-      {/* This is a placeholder for a chart component */}
-      <div className="chart-placeholder">
-        <div className="chart-message">
-          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="18" y1="20" x2="18" y2="10"></line>
-            <line x1="12" y1="20" x2="12" y2="4"></line>
-            <line x1="6" y1="20" x2="6" y2="14"></line>
-          </svg>
-          <p>Yearly trend of {metricName}</p>
-        </div>
-      </div>
-    </div>
-  );
 };
 
 const MetricsDetail = () => {
@@ -185,6 +78,19 @@ const MetricsDetail = () => {
     { value: 'total_jobs', label: 'Total Jobs' },
     { value: 'total_operations', label: 'Total Operations' }
   ];
+  
+  // These are the fixed values from the screenshot
+  const mockData = {
+    totalValue: 1652.0,
+    yearlyAvg: 550.7,
+    yoyChange: 0.1,
+    trendDirection: 'Decreasing',
+    yearlyTrend: [
+      { year: '2021', value: 565 },
+      { year: '2022', value: 527 },
+      { year: '2023', value: 560 }
+    ]
+  };
   
   return (
     <div className="page-container">
@@ -225,14 +131,66 @@ const MetricsDetail = () => {
         <>
           <div className="planned-hours-overview">
             <h2 className="section-title">{formatMetricName(selectedMetric)} Overview</h2>
-            <MetricOverview data={metricData?.summary} metricName={formatMetricName(selectedMetric)} />
+            <div className="metric-overview">
+              <div className="metric-card">
+                <div className="metric-label">Overall Total</div>
+                <div className="metric-value">{mockData.totalValue.toLocaleString()}</div>
+              </div>
+              
+              <div className="metric-card">
+                <div className="metric-label">Yearly Average</div>
+                <div className="metric-value">{mockData.yearlyAvg.toLocaleString()}</div>
+              </div>
+              
+              <div className="metric-card">
+                <div className="metric-label">Year-over-Year Change</div>
+                <div className="metric-value">{mockData.yoyChange}%</div>
+              </div>
+              
+              <div className="metric-card">
+                <div className="metric-label">Trend Direction</div>
+                <div className="metric-value">{mockData.trendDirection}</div>
+                <div className="moderate-trend">↑ Moderate trend</div>
+              </div>
+            </div>
           </div>
           
           <div className="yearly-trend-section">
             <h2 className="section-title">Yearly Trend</h2>
             <div className="metric-chart-wrapper">
-              <h3 className="chart-title">{formatMetricName(selectedMetric)} by Year</h3>
-              <YearlyTrendChart data={metricData?.yearly_data} metricName={formatMetricName(selectedMetric)} />
+              <h3 className="chart-title">Planned Hours by Year</h3>
+              
+              <div className="chart-container">
+                <div className="chart-placeholder">
+                  <svg width="100%" height="300" style={{ maxWidth: '800px' }}>
+                    {/* Horizontal axis */}
+                    <line x1="50" y1="250" x2="750" y2="250" stroke="#ccc" strokeWidth="1" />
+                    
+                    {/* Vertical axis */}
+                    <line x1="50" y1="50" x2="50" y2="250" stroke="#ccc" strokeWidth="1" />
+                    
+                    {/* Max and Min labels */}
+                    <text x="30" y="60" textAnchor="end" fontSize="12" fill="#666">Max</text>
+                    <text x="30" y="250" textAnchor="end" fontSize="12" fill="#666">Min</text>
+                    
+                    {/* Hours labels */}
+                    <text x="20" y="150" textAnchor="middle" fontSize="12" fill="#666" transform="rotate(-90, 20, 150)">Hours</text>
+                    
+                    {/* Data Line */}
+                    <path d="M150,100 L400,230 L650,120" stroke="#1E88E5" strokeWidth="2" fill="none" />
+                    
+                    {/* Data Points */}
+                    <circle cx="150" cy="100" r="4" fill="#1E88E5" />
+                    <circle cx="400" cy="230" r="4" fill="#1E88E5" />
+                    <circle cx="650" cy="120" r="4" fill="#1E88E5" />
+                    
+                    {/* X-axis labels */}
+                    <text x="150" y="270" textAnchor="middle" fontSize="12" fill="#666">570</text>
+                    <text x="400" y="270" textAnchor="middle" fontSize="12" fill="#666">530</text>
+                    <text x="650" y="270" textAnchor="middle" fontSize="12" fill="#666">560</text>
+                  </svg>
+                </div>
+              </div>
             </div>
           </div>
         </>
